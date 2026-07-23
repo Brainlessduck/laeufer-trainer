@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Läufer-Trainer — 5:1 System lernen</title>
+<meta name="description" content="Interaktiver Trainer für das 5:1 Läufersystem im Volleyball. Position wählen, Rotation lernen, im Quiz testen.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@500;700&family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0d1b2a;
+    --bg-2: #122436;
+    --court: #c1935f;
+    --court-line: #f4ede1;
+    --gold: #f0a202;
+    --teal: #2ec4b6;
+    --red: #e0524a;
+    --ink: #f4ede1;
+    --muted: #8ea3b8;
+    --card: #16283b;
+    --card-border: #24405c;
+    --radius: 14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: radial-gradient(circle at 50% -10%, var(--bg-2), var(--bg) 60%);
+    color: var(--ink);
+    font-family: 'Manrope', sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:28px 20px 80px;}
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    font-size:12px;
+    color:var(--gold);
+    display:flex; align-items:center; gap:8px;
+  }
+  .eyebrow::before{content:"●"; color:var(--teal); font-size:8px;}
+  h1{
+    font-family:'Anton',sans-serif;
+    font-weight:400;
+    text-transform:uppercase;
+    letter-spacing:.02em;
+    font-size:clamp(32px,7vw,52px);
+    line-height:.98;
+    margin:6px 0 10px;
+  }
+  h1 span{color:var(--gold);}
+  .sub{color:var(--muted); font-size:15px; line-height:1.55; max-width:56ch; margin:0 0 28px;}
+  .top-nav{display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;}
+  .btn-ghost{
+    background:none; border:1px solid var(--card-border); color:var(--muted);
+    font-family:'Manrope',sans-serif; font-weight:700; font-size:13px;
+    padding:8px 14px; border-radius:999px; cursor:pointer; transition:.15s;
+  }
+  .btn-ghost:hover{border-color:var(--gold); color:var(--gold);}
+
+  /* Home: role grid */
+  .roles{display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-top:6px;}
+  @media (max-width:520px){ .roles{grid-template-columns:1fr;} }
+  .role-card{
+    background:var(--card); border:1px solid var(--card-border); border-radius:var(--radius);
+    padding:18px; text-align:left; cursor:pointer; color:var(--ink);
+    transition:.18s; position:relative; overflow:hidden;
+  }
+  .role-card:hover{ border-color:var(--gold); transform:translateY(-2px); }
+  .role-card .num{
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:12px;
+    color:var(--teal); letter-spacing:.08em;
+  }
+  .role-card h3{ font-family:'Anton',sans-serif; font-weight:400; font-size:22px; margin:6px 0 6px; text-transform:uppercase;}
+  .role-card p{ color:var(--muted); font-size:13px; line-height:1.5; margin:0;}
+
+  /* Rotation dial */
+  .dial-wrap{ display:flex; justify-content:center; margin:22px 0 10px;}
+  .dial{ position:relative; width:220px; height:220px; }
+  .dial-node{
+    position:absolute; width:40px; height:40px; border-radius:50%;
+    background:var(--card); border:2px solid var(--card-border);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:15px;
+    cursor:pointer; transition:.15s; color:var(--muted);
+  }
+  .dial-node:hover{ border-color:var(--teal); color:var(--ink); }
+  .dial-node.active{ background:var(--gold); border-color:var(--gold); color:#1a1206; transform:scale(1.12); }
+  .dial-node.done::after{ content:""; }
+  .dial-center{
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    text-align:center; font-family:'Anton',sans-serif; font-size:13px; color:var(--muted);
+    letter-spacing:.06em; text-transform:uppercase; width:70px;
+  }
+
+  /* Court */
+  .court-shell{ display:flex; justify-content:center; margin:18px 0; }
+  svg.court{ width:100%; max-width:340px; height:auto; }
+  .zone{ fill:var(--court); stroke:var(--court-line); stroke-width:2; transition:.15s; cursor:default;}
+  .zone.target{ fill:var(--gold); }
+  .zone.clickable{ cursor:pointer; }
+  .zone.clickable:hover{ fill:#d9a877; }
+  .zone.correct{ fill:var(--teal); }
+  .zone.wrong{ fill:var(--red); }
+  .zone-label{ font-family:'JetBrains Mono',monospace; font-weight:700; font-size:22px; fill:var(--bg); pointer-events:none;}
+  .net-line{ stroke:var(--court-line); stroke-width:5; }
+  .net-label{ font-family:'JetBrains Mono',monospace; font-size:11px; fill:var(--muted); letter-spacing:.15em;}
+
+  .info-card{
+    background:var(--card); border:1px solid var(--card-border); border-radius:var(--radius);
+    padding:20px; margin-top:6px;
+  }
+  .info-card .tag{
+    font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--teal); letter-spacing:.1em; text-transform:uppercase;
+  }
+  .info-card p{ line-height:1.6; font-size:15.5px; margin:10px 0 0; }
+  .info-card p b{ color:var(--gold); }
+
+  .nav-row{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:22px;}
+  .btn{
+    font-family:'Manrope',sans-serif; font-weight:800; font-size:14px;
+    background:var(--gold); color:#1a1206; border:none; border-radius:999px;
+    padding:12px 22px; cursor:pointer; transition:.15s;
+  }
+  .btn:hover{ filter:brightness(1.08); transform:translateY(-1px); }
+  .btn.secondary{ background:none; border:1px solid var(--card-border); color:var(--ink);}
+  .btn.secondary:hover{ border-color:var(--teal); color:var(--teal);}
+  .btn:disabled{ opacity:.35; cursor:not-allowed; transform:none; filter:none;}
+
+  /* Quiz */
+  .score-bar{
+    display:flex; justify-content:space-between; align-items:center;
+    font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--muted);
+    margin-bottom:8px;
+  }
+  .score-bar b{ color:var(--gold); }
+  .quiz-prompt{ font-family:'Anton',sans-serif; text-transform:uppercase; font-size:24px; text-align:center; margin:6px 0 2px;}
+  .quiz-sub{ text-align:center; color:var(--muted); font-size:13px; margin-bottom:6px;}
+  .feedback{
+    margin-top:14px; padding:16px; border-radius:var(--radius); font-size:14.5px; line-height:1.55;
+    border:1px solid var(--card-border); background:var(--card); display:none;
+  }
+  .feedback.show{ display:block; }
+  .feedback.ok{ border-color:var(--teal); }
+  .feedback.bad{ border-color:var(--red); }
+  .feedback .title{ font-weight:800; margin-bottom:6px; }
+  .feedback.ok .title{ color:var(--teal); }
+  .feedback.bad .title{ color:var(--red); }
+
+  .result-card{ text-align:center; }
+  .result-card .big{ font-family:'Anton',sans-serif; font-size:56px; color:var(--gold); }
+
+  .footer-note{ margin-top:40px; font-size:12px; color:var(--muted); text-align:center; line-height:1.6;}
+  .footer-note a{ color:var(--teal); }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+/* ---------------- DATA ---------------- */
+const ROLES = {
+  Z: {
+    label: "Zuspieler",
+    short: "Z",
+    color: "var(--gold)",
+    role_tip: "Der Dreh- und Angelpunkt des Systems: muss von jeder der sechs Positionen aus zuverlässig zuspielen können.",
+    rot: {
+      1: {pos:1, text:"Du stehst hinter dem Annahmeriegel. Nach der Annahme hast du <b>drei Angreifer vorne</b> (Außen 2 + Mitte 3) — dazu wird der Außen von Position 5 oft als Pipe-Angreifer im Hinterfeld eingesetzt."},
+      2: {pos:2, text:"Die einfachste Rotation für dich: du bleibst einfach stehen und hast <b>zwei Angreifer vorne</b> sowie den Diagonalspieler als Hinterfeld-Option."},
+      3: {pos:3, text:"Du stehst links neben deinem Mittelblocker und <b>tauscht nach dem Aufschlag die Position</b> mit ihm, damit er wieder mittig zum Netz steht."},
+      4: {pos:4, text:"Du stehst links von Mittelblocker und Außenangreifer. Die Laufdistanz zum Zuspielort ist lang — <b>lauf schon beim gegnerischen Schlagmoment los</b>."},
+      5: {pos:5, text:"Du stehst hinter deinem Mittelblocker und links von der Außen-Annahme. Von hier ist der Weg zum Netz noch überschaubar."},
+      6: {pos:6, text:"Du stehst zwischen dem hinteren Mittelblocker/Libero und dem Außenangreifer, hinter dem Diagonalspieler. Von dieser Position kannst du <b>direkt zuspielen</b>."}
+    }
+  },
+  MB1: {
+    label: "Mittelblocker (vorne)",
+    short: "MB1",
+    color: "var(--teal)",
+    role_tip: "Orientiert sich immer Richtung Position 3 — dort greift und blockt er am liebsten.",
+    rot: {
+      1: {pos:3, text:"Du stehst vorne mittig. In der Annahme übernimmst du nur <b>kurze Bälle</b> und stehst sofort für den Angriff über die 3 bereit."},
+      2: {pos:4, text:"Du stehst links vom Außenangreifer. Nach der Annahme <b>läufst du sofort zur 3</b>, um dort anzugreifen — kurze Bälle nimmst du selbst an."},
+      3: {pos:5, text:"Du bist im Hinterfeld. Nimm an und bleib zur Abwehr auf 5, oder wechsle je nach Absprache auf die 6."},
+      4: {pos:6, text:"Du stehst hinten mittig, nimmst an und wechselst danach in die Abwehr, meist auf Position 5."},
+      5: {pos:1, text:"Du nimmst auf der 1 an und wechselst danach in die Abwehr — hier kommt häufig der Libero für dich ins Spiel."},
+      6: {pos:2, text:"Du stehst rechts vom Diagonalangreifer. Nach der Annahme geht es <b>direkt mittig zur 3</b> für den Schnellangriff."}
+    }
+  },
+  MB2: {
+    label: "Mittelblocker (hinten) / Libero",
+    short: "MB2",
+    color: "#7fb2ff",
+    role_tip: "Rückraum-Spezialist — übernimmt die Abwehr auf 5 oder 6 und wird hier meistens vom Libero ersetzt.",
+    rot: {
+      1: {pos:6, text:"Du nimmst hinten mittig an und bleibst zur Abwehr auf 6, oder wehrst optional auf 5 ab."},
+      2: {pos:1, text:"Du nimmst auf der 1 an und wechselst danach in die Abwehr auf 5 oder 6 — klassischer Einsatzort für den Libero."},
+      3: {pos:2, text:"Du tauschst die Position mit dem Zuspieler und kannst danach sofort angreifen — auch ein Angriff über Kopf ist hier möglich."},
+      4: {pos:3, text:"Du stehst vorne mittig zwischen Zuspieler und Außenangreifer und bist direkt angriffsbereit."},
+      5: {pos:4, text:"Du stehst links vom Außenangreifer. Nach der Annahme geht es sofort zur 3, um dort anzugreifen."},
+      6: {pos:5, text:"Du nimmst hinten an, bleibst zur Abwehr auf 5 oder rückst optional auf 6."}
+    }
+  },
+  AA1: {
+    label: "Außenangreifer (vorne)",
+    short: "AA1",
+    color: "#e0524a",
+    role_tip: "Teil des Annahmeriegels — greift an, sobald er vorne am Netz steht.",
+    rot: {
+      1: {pos:2, text:"Du nimmst zunächst auf Position 1 an, greifst danach von der 2 an. Nach dem ersten Angriff kannst du mit dem Diagonalspieler die Seite wechseln."},
+      2: {pos:3, text:"Du stehst rechts vom Mittelblocker, nimmst auf 5 an und wechselst danach zur 4, um dort anzugreifen."},
+      3: {pos:4, text:"Du nimmst zunächst auf 5 an und greifst anschließend vorne von der 4 an."},
+      4: {pos:5, text:"Du bist Teil der Abwehr/Annahme im Hinterfeld zwischen 5 und 6 — flexibel je nach Zuspielerposition."},
+      5: {pos:6, text:"Du nimmst auf 6 an und rückst danach auf 5 vor, oder bleibst zur Abwehr auf 6."},
+      6: {pos:1, text:"Du nimmst auf 1 an und wechselst danach mit dem Libero auf 5, oder bleibst zur Abwehr auf 6."}
+    }
+  },
+  AA2: {
+    label: "Außenangreifer (hinten)",
+    short: "AA2",
+    color: "#f2b134",
+    role_tip: "Rückraum-Außen — nach der Annahme oft als Pipe-Angreifer von der 6 im Einsatz.",
+    rot: {
+      1: {pos:5, text:"Du nimmst auf 5 an und wechselst danach auf 6, oder bleibst dort zur Abwehr."},
+      2: {pos:6, text:"Du nimmst auf 6 an und rückst danach auf 5 vor oder bleibst zur Abwehr dort."},
+      3: {pos:1, text:"Du stehst rechts vom Diagonalspieler, nimmst auf 1 an und wechselst danach in die Abwehr auf 5 oder 6."},
+      4: {pos:2, text:"Du stehst rechts von Mittelblocker und Zuspieler, nimmst auf 5 an und gehst danach zur 4 zum Angreifen."},
+      5: {pos:3, text:"Du nimmst auf 5 an und wechselst zur 4 zum Angreifen — dabei musst du rechts vom vorderen Mittelblocker stehen."},
+      6: {pos:4, text:"Du nimmst auf 5 an und gehst danach sofort nach vorne zur 4, um dort anzugreifen."}
+    }
+  },
+  DIA: {
+    label: "Diagonalangreifer",
+    short: "DIA",
+    color: "#c084fc",
+    role_tip: "Reiner Angriffsspezialist — im klassischen System <b>kein Teil der Annahme</b>, greift aber von vorne und hinten an.",
+    rot: {
+      1: {pos:4, text:"Du stehst vorne und greifst von der 4 an. Nach dem ersten Angriff kannst du optional mit dem Außenangreifer (2) die Seite tauschen."},
+      2: {pos:5, text:"Kein Teil der Annahme: du stehst links vom Außenangreifer im Hinterfeld und greifst von dort als Pipe-Angreifer an."},
+      3: {pos:6, text:"Kein Teil der Annahme: du stehst links von der Außen-Annahme und greifst als Hinterfeld-Angreifer an."},
+      4: {pos:1, text:"Kein Teil der Annahme: du stehst rechts neben dem Libero und greifst von rechts hinten als Pipe-Angreifer an."},
+      5: {pos:2, text:"Du stehst vorne auf Position 2 und kannst von dort sofort angreifen."},
+      6: {pos:3, text:"Du stehst vorne links vom Mittelblocker, vor dem Zuspieler, und gehst zur 2 für deinen Angriff."}
+    }
+  }
+};
+
+const ZONE_LAYOUT = {
+  4:{x:0,  y:20, w:120,h:140}, 3:{x:120,y:20, w:120,h:140}, 2:{x:240,y:20, w:120,h:140},
+  5:{x:0,  y:160,w:120,h:140}, 6:{x:120,y:160,w:120,h:140}, 1:{x:240,y:160,w:120,h:140}
+};
+
+/* ---------------- STATE ---------------- */
+let state = { screen:"home", role:null, learnStep:1, quiz:{ order:[], idx:0, score:0, answered:false } };
+
+/* ---------------- HELPERS ---------------- */
+function courtSVG({target=null, clickable=false, correctZone=null, pickedZone=null}={}){
+  let zones = "";
+  for(const num in ZONE_LAYOUT){
+    const n = Number(num);
+    const z = ZONE_LAYOUT[num];
+    let cls = "zone";
+    if(clickable) cls += " clickable";
+    if(target && n===target) cls += " target";
+    if(correctZone && n===correctZone) cls += " correct";
+    if(pickedZone && n===pickedZone && pickedZone!==correctZone) cls += " wrong";
+    zones += `<rect class="${cls}" data-zone="${num}" x="${z.x}" y="${z.y}" width="${z.w}" height="${z.h}" rx="6"/>`;
+    zones += `<text class="zone-label" x="${z.x+z.w/2}" y="${z.y+z.h/2+8}" text-anchor="middle">${num}</text>`;
+  }
+  return `<svg class="court" viewBox="0 0 360 305" xmlns="http://www.w3.org/2000/svg">
+    <line class="net-line" x1="0" y1="16" x2="360" y2="16"/>
+    <text class="net-label" x="180" y="10" text-anchor="middle">NETZ</text>
+    ${zones}
+  </svg>`;
+}
+
+function dialHTML(activeRot){
+  const R = 84;
+  let nodes = "";
+  for(let i=1;i<=6;i++){
+    const angle = (i-1)/6 * 2*Math.PI - Math.PI/2;
+    const x = 110 + R*Math.cos(angle) - 20;
+    const y = 110 + R*Math.sin(angle) - 20;
+    nodes += `<div class="dial-node ${i===activeRot?'active':''}" data-rot="${i}" style="left:${x}px; top:${y}px;">${i}</div>`;
+  }
+  return `<div class="dial-wrap"><div class="dial">${nodes}<div class="dial-center">Läufer</div></div></div>`;
+}
+
+function render(){
+  const app = document.getElementById("app");
+  if(state.screen==="home") app.innerHTML = renderHome();
+  else if(state.screen==="learn") app.innerHTML = renderLearn();
+  else if(state.screen==="quiz") app.innerHTML = renderQuiz();
+  else if(state.screen==="result") app.innerHTML = renderResult();
+  attachEvents();
+}
+
+/* ---------------- SCREENS ---------------- */
+function renderHome(){
+  let cards = "";
+  for(const key in ROLES){
+    const r = ROLES[key];
+    cards += `<div class="role-card" data-role="${key}">
+      <div class="num">${r.short}</div>
+      <h3>${r.label}</h3>
+      <p>${r.role_tip.replace(/<[^>]+>/g,'')}</p>
+    </div>`;
+  }
+  return `
+    <div class="eyebrow">5:1 Läufersystem</div>
+    <h1>Läufer<span>-Trainer</span></h1>
+    <p class="sub">Wähle deine Position. Du lernst Schritt für Schritt, wo du in jeder der sechs Rotationen (Läufer 1–6) stehen musst — und testest dich danach im Quiz.</p>
+    <div class="roles">${cards}</div>
+    <div class="footer-note">Basierend auf dem 5:1-System · Quelle für die Grundlagen: <a href="https://volleyball-insider.com/training/taktik/laefer-system-5-1-volleyball/" target="_blank" rel="noopener">volleyball-insider.com</a></div>
+  `;
+}
+
+function renderLearn(){
+  const role = ROLES[state.role];
+  const step = state.learnStep;
+  const data = role.rot[step];
+  return `
+    <div class="top-nav">
+      <button class="btn-ghost" data-action="home">← Positionen</button>
+      <div class="eyebrow">${role.label}</div>
+    </div>
+    <h1 style="font-size:clamp(26px,6vw,38px)">Lernmodus</h1>
+    <p class="sub">${role.role_tip}</p>
+    ${dialHTML(step)}
+    <div class="court-shell">${courtSVG({target:data.pos})}</div>
+    <div class="info-card">
+      <div class="tag">Läufer-${step} · Position ${data.pos}</div>
+      <p>${data.text}</p>
+    </div>
+    <div class="nav-row">
+      <button class="btn secondary" data-action="learn-prev" ${step===1?"disabled":""}>Zurück</button>
+      ${step===6
+        ? `<button class="btn" data-action="start-quiz">Weiter zum Quiz →</button>`
+        : `<button class="btn" data-action="learn-next">Weiter →</button>`}
+    </div>
+  `;
+}
+
+function renderQuiz(){
+  const role = ROLES[state.role];
+  const q = state.quiz;
+  const rot = q.order[q.idx];
+  const data = role.rot[rot];
+  const answered = q.answered;
+  return `
+    <div class="top-nav">
+      <button class="btn-ghost" data-action="home">← Positionen</button>
+      <div class="eyebrow">${role.label} · Quiz</div>
+    </div>
+    <div class="score-bar">
+      <span>Frage ${q.idx+1} / ${q.order.length}</span>
+      <span>Punkte: <b>${q.score}</b></span>
+    </div>
+    <div class="quiz-prompt">Läufer-${rot}</div>
+    <div class="quiz-sub">Wo musst du als ${role.label} stehen? Tippe auf das richtige Feld.</div>
+    <div class="court-shell">${courtSVG({clickable: !answered, correctZone: answered ? data.pos : null, pickedZone: answered ? q.pickedZone : null})}</div>
+    <div id="feedback" class="feedback ${answered ? 'show '+(q.lastCorrect?'ok':'bad') : ''}">
+      ${answered ? `<div class="title">${q.lastCorrect ? 'Richtig!' : 'Nicht ganz.'}</div><p style="margin:0;">${data.text}</p>` : ""}
+    </div>
+    <div class="nav-row">
+      <button class="btn secondary" data-action="quiz-quit">Beenden</button>
+      <button class="btn" data-action="quiz-next" ${answered?"":"disabled"}>${q.idx+1<q.order.length ? "Nächste Frage →" : "Ergebnis anzeigen"}</button>
+    </div>
+  `;
+}
+
+function renderResult(){
+  const role = ROLES[state.role];
+  const q = state.quiz;
+  const pct = Math.round((q.score/6)*100);
+  let msg = "Solide Basis — noch ein Durchlauf festigt es.";
+  if(pct===100) msg = "Perfekt! Diese Rotation sitzt.";
+  else if(pct>=70) msg = "Sehr gut! Kleine Wackler, aber im Kern verstanden.";
+  return `
+    <div class="top-nav">
+      <button class="btn-ghost" data-action="home">← Positionen</button>
+      <div class="eyebrow">${role.label} · Ergebnis</div>
+    </div>
+    <div class="info-card result-card">
+      <div class="big">${q.score} / 6</div>
+      <p>${msg}</p>
+    </div>
+    <div class="nav-row">
+      <button class="btn secondary" data-action="learn-again">Nochmal lernen</button>
+      <button class="btn" data-action="quiz-again">Quiz wiederholen</button>
+    </div>
+  `;
+}
+
+/* ---------------- EVENTS ---------------- */
+function attachEvents(){
+  document.querySelectorAll("[data-role]").forEach(el=>{
+    el.addEventListener("click", ()=>{
+      state.role = el.dataset.role;
+      state.screen = "learn";
+      state.learnStep = 1;
+      render();
+    });
+  });
+  const homeBtn = document.querySelector('[data-action="home"]');
+  if(homeBtn) homeBtn.addEventListener("click", ()=>{ state.screen="home"; render(); });
+
+  document.querySelectorAll(".dial-node").forEach(el=>{
+    el.addEventListener("click", ()=>{
+      if(state.screen==="learn"){ state.learnStep = Number(el.dataset.rot); render(); }
+    });
+  });
+
+  const prev = document.querySelector('[data-action="learn-prev"]');
+  if(prev) prev.addEventListener("click", ()=>{ state.learnStep = Math.max(1,state.learnStep-1); render(); });
+  const next = document.querySelector('[data-action="learn-next"]');
+  if(next) next.addEventListener("click", ()=>{ state.learnStep = Math.min(6,state.learnStep+1); render(); });
+
+  const startQuiz = document.querySelector('[data-action="start-quiz"]');
+  if(startQuiz) startQuiz.addEventListener("click", ()=>{ beginQuiz(); });
+
+  const learnAgain = document.querySelector('[data-action="learn-again"]');
+  if(learnAgain) learnAgain.addEventListener("click", ()=>{ state.screen="learn"; state.learnStep=1; render(); });
+  const quizAgain = document.querySelector('[data-action="quiz-again"]');
+  if(quizAgain) quizAgain.addEventListener("click", ()=>{ beginQuiz(); });
+  const quizQuit = document.querySelector('[data-action="quiz-quit"]');
+  if(quizQuit) quizQuit.addEventListener("click", ()=>{ state.screen="home"; render(); });
+
+  document.querySelectorAll(".zone.clickable").forEach(el=>{
+    el.addEventListener("click", ()=>{ handleZoneClick(Number(el.dataset.zone)); });
+  });
+
+  const qNext = document.querySelector('[data-action="quiz-next"]');
+  if(qNext) qNext.addEventListener("click", ()=>{
+    if(state.quiz.idx+1 < state.quiz.order.length){
+      state.quiz.idx++;
+      state.quiz.answered = false;
+      state.quiz.pickedZone = null;
+      render();
+    } else {
+      state.screen = "result";
+      render();
+    }
+  });
+}
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function beginQuiz(){
+  state.screen = "quiz";
+  state.quiz = { order: shuffle([1,2,3,4,5,6]), idx:0, score:0, answered:false, lastCorrect:false, pickedZone:null };
+  render();
+}
+
+function handleZoneClick(zone){
+  const role = ROLES[state.role];
+  const q = state.quiz;
+  const rot = q.order[q.idx];
+  const correctPos = role.rot[rot].pos;
+  q.answered = true;
+  q.pickedZone = zone;
+  q.lastCorrect = (zone === correctPos);
+  if(q.lastCorrect) q.score++;
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
