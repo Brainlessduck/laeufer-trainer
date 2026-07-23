@@ -104,6 +104,7 @@ h1{
   color:var(--accent); font-size:2.3rem; font-weight:900; letter-spacing:-0.5px;
   margin-bottom:14px; line-height:1.1;
 }
+h1.main-title{ letter-spacing: 2px; }
 h1.step-title{ font-size:1.5rem; }
 p.sub{ color:var(--text-dim); line-height:1.75; font-size:1.02rem; max-width:56ch; margin-bottom:26px; }
 
@@ -371,7 +372,7 @@ function renderHome(){
   }
   return `
     <div class="eyebrow">5:1 Läufersystem</div>
-    <h1>Läufer-Trainer</h1>
+    <h1 class="main-title">Läufer-Trainer</h1>
     <p class="sub">Wähle deine Position. Du lernst Schritt für Schritt, wo du in jeder der sechs Rotationen (Läufer 1–6) stehen musst — und testest dich danach im Quiz.</p>
     <div class="roles">${cards}</div>
     <div class="footer-note">Basierend auf dem 5:1-System · Grundlagen: <a href="https://volleyball-insider.com/training/taktik/laefer-system-5-1-volleyball/" target="_blank" rel="noopener">volleyball-insider.com</a></div>
