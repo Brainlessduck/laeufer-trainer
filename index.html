@@ -155,6 +155,7 @@ p.sub{ color:var(--text-dim); line-height:1.75; font-size:1.02rem; max-width:56c
 
 /* Court */
 .court-shell{ display:flex; justify-content:center; margin:16px 0; }
+.rotation-photo{ max-width:100%; width:340px; border-radius:16px; border:1px solid var(--card-border); }
 svg.court{ width:100%; max-width:320px; height:auto; }
 .zone{ fill: rgba(255,255,255,0.04); stroke:var(--card-border); stroke-width:2; transition:.15s; }
 html[data-theme="light"] .zone{ fill: rgba(0,0,0,0.03); }
@@ -246,67 +247,67 @@ const ROLES = {
   Z: { label:"Zuspieler", short:"Z",
     role_tip:"Der Dreh- und Angelpunkt des Systems: muss von jeder der sechs Positionen aus zuverlässig zuspielen können.",
     rot:{
-      1:{pos:1,text:"Du stehst hinter dem Annahmeriegel. Nach der Annahme hast du <b>drei Angreifer vorne</b> (Außen 2 + Mitte 3) — dazu wird der Außen von Position 5 oft als Pipe-Angreifer im Hinterfeld eingesetzt."},
-      2:{pos:2,text:"Die einfachste Rotation für dich: du bleibst einfach stehen und hast <b>zwei Angreifer vorne</b> sowie den Diagonalspieler als Hinterfeld-Option."},
-      3:{pos:3,text:"Du stehst links neben deinem Mittelblocker und <b>tauscht nach dem Aufschlag die Position</b> mit ihm, damit er wieder mittig zum Netz steht."},
-      4:{pos:4,text:"Du stehst links von Mittelblocker und Außenangreifer. Die Laufdistanz zum Zuspielort ist lang — <b>lauf schon beim gegnerischen Schlagmoment los</b>."},
-      5:{pos:5,text:"Du stehst hinter deinem Mittelblocker und links von der Außen-Annahme. Von hier ist der Weg zum Netz noch überschaubar."},
-      6:{pos:6,text:"Du stehst zwischen dem hinteren Mittelblocker/Libero und dem Außenangreifer, hinter dem Diagonalspieler. Von dieser Position kannst du <b>direkt zuspielen</b>."}
+      1:{pos:1,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-I-1024x1024.jpg",text:"Du stehst hinter dem Annahmeriegel. Nach der Annahme hast du <b>drei Angreifer vorne</b> (Außen 2 + Mitte 3) — dazu wird der Außen von Position 5 oft als Pipe-Angreifer im Hinterfeld eingesetzt."},
+      2:{pos:2,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-VI-4-1024x1024.jpg",text:"Die einfachste Rotation für dich: du bleibst einfach stehen und hast <b>zwei Angreifer vorne</b> sowie den Diagonalspieler als Hinterfeld-Option."},
+      3:{pos:3,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1-Annahme-Laeufer-III-zuspieler-1-1024x1024.jpg",text:"Du stehst links neben deinem Mittelblocker und <b>tauscht nach dem Aufschlag die Position</b> mit ihm, damit er wieder mittig zum Netz steht."},
+      4:{pos:4,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-IV-1024x1024.jpg",text:"Du stehst links von Mittelblocker und Außenangreifer. Die Laufdistanz zum Zuspielort ist lang — <b>lauf schon beim gegnerischen Schlagmoment los</b>."},
+      5:{pos:5,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-VI-2-1024x1024.jpg",text:"Du stehst hinter deinem Mittelblocker und links von der Außen-Annahme. Von hier ist der Weg zum Netz noch überschaubar."},
+      6:{pos:6,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-VI-1024x1024.jpg",text:"Du stehst zwischen dem hinteren Mittelblocker/Libero und dem Außenangreifer, hinter dem Diagonalspieler. Von dieser Position kannst du <b>direkt zuspielen</b>."}
     }
   },
   MB1: { label:"Mittelblocker (vorne)", short:"MB1",
     role_tip:"Orientiert sich immer Richtung Position 3 — dort greift und blockt er am liebsten.",
     rot:{
-      1:{pos:3,text:"Du stehst vorne mittig. In der Annahme übernimmst du nur <b>kurze Bälle</b> und stehst sofort für den Angriff über die 3 bereit."},
-      2:{pos:4,text:"Du stehst links vom Außenangreifer. Nach der Annahme <b>läufst du sofort zur 3</b>, um dort anzugreifen — kurze Bälle nimmst du selbst an."},
-      3:{pos:5,text:"Du bist im Hinterfeld. Nimm an und bleib zur Abwehr auf 5, oder wechsle je nach Absprache auf die 6."},
-      4:{pos:6,text:"Du stehst hinten mittig, nimmst an und wechselst danach in die Abwehr, meist auf Position 5."},
-      5:{pos:1,text:"Du nimmst auf der 1 an und wechselst danach in die Abwehr — hier kommt häufig der Libero für dich ins Spiel."},
-      6:{pos:2,text:"Du stehst rechts vom Diagonalangreifer. Nach der Annahme geht es <b>direkt mittig zur 3</b> für den Schnellangriff."}
+      1:{pos:3,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-I-2-1024x1024.jpg",text:"Du stehst vorne mittig. In der Annahme übernimmst du nur <b>kurze Bälle</b> und stehst sofort für den Angriff über die 3 bereit."},
+      2:{pos:4,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-II-1024x1024.jpg",text:"Du stehst links vom Außenangreifer. Nach der Annahme <b>läufst du sofort zur 3</b>, um dort anzugreifen — kurze Bälle nimmst du selbst an."},
+      3:{pos:5,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-III-1024x1024.jpg",text:"Du bist im Hinterfeld. Nimm an und bleib zur Abwehr auf 5, oder wechsle je nach Absprache auf die 6."},
+      4:{pos:6,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-IV-1-1024x1024.jpg",text:"Du stehst hinten mittig, nimmst an und wechselst danach in die Abwehr, meist auf Position 5."},
+      5:{pos:1,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-V-1024x1024.jpg",text:"Du nimmst auf der 1 an und wechselst danach in die Abwehr — hier kommt häufig der Libero für dich ins Spiel."},
+      6:{pos:2,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-VI-1-1024x1024.jpg",text:"Du stehst rechts vom Diagonalangreifer. Nach der Annahme geht es <b>direkt mittig zur 3</b> für den Schnellangriff."}
     }
   },
   MB2: { label:"Mittelblocker (hinten) / Libero", short:"MB2",
     role_tip:"Rückraum-Spezialist — übernimmt die Abwehr auf 5 oder 6 und wird hier meistens vom Libero ersetzt.",
     rot:{
-      1:{pos:6,text:"Du nimmst hinten mittig an und bleibst zur Abwehr auf 6, oder wehrst optional auf 5 ab."},
-      2:{pos:1,text:"Du nimmst auf der 1 an und wechselst danach in die Abwehr auf 5 oder 6 — klassischer Einsatzort für den Libero."},
-      3:{pos:2,text:"Du tauschst die Position mit dem Zuspieler und kannst danach sofort angreifen — auch ein Angriff über Kopf ist hier möglich."},
-      4:{pos:3,text:"Du stehst vorne mittig zwischen Zuspieler und Außenangreifer und bist direkt angriffsbereit."},
-      5:{pos:4,text:"Du stehst links vom Außenangreifer. Nach der Annahme geht es sofort zur 3, um dort anzugreifen."},
-      6:{pos:5,text:"Du nimmst hinten an, bleibst zur Abwehr auf 5 oder rückst optional auf 6."}
+      1:{pos:6,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-I-3-1024x1024.jpg",text:"Du nimmst hinten mittig an und bleibst zur Abwehr auf 6, oder wehrst optional auf 5 ab."},
+      2:{pos:1,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-II-1-1024x1024.jpg",text:"Du nimmst auf der 1 an und wechselst danach in die Abwehr auf 5 oder 6 — klassischer Einsatzort für den Libero."},
+      3:{pos:2,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-III-1-1024x1024.jpg",text:"Du tauschst die Position mit dem Zuspieler und kannst danach sofort angreifen — auch ein Angriff über Kopf ist hier möglich."},
+      4:{pos:3,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-IV-2-1024x1024.jpg",text:"Du stehst vorne mittig zwischen Zuspieler und Außenangreifer und bist direkt angriffsbereit."},
+      5:{pos:4,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-V-1-1024x1024.jpg",text:"Du stehst links vom Außenangreifer. Nach der Annahme geht es sofort zur 3, um dort anzugreifen."},
+      6:{pos:5,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-VI-5-1024x1024.jpg",text:"Du nimmst hinten an, bleibst zur Abwehr auf 5 oder rückst optional auf 6."}
     }
   },
   AA1: { label:"Außenangreifer (vorne)", short:"AA1",
     role_tip:"Teil des Annahmeriegels — greift an, sobald er vorne am Netz steht.",
     rot:{
-      1:{pos:2,text:"Du nimmst zunächst auf Position 1 an, greifst danach von der 2 an. Nach dem ersten Angriff kannst du mit dem Diagonalspieler die Seite wechseln."},
-      2:{pos:3,text:"Du stehst rechts vom Mittelblocker, nimmst auf 5 an und wechselst danach zur 4, um dort anzugreifen."},
-      3:{pos:4,text:"Du nimmst zunächst auf 5 an und greifst anschließend vorne von der 4 an."},
-      4:{pos:5,text:"Du bist Teil der Abwehr/Annahme im Hinterfeld zwischen 5 und 6 — flexibel je nach Zuspielerposition."},
-      5:{pos:6,text:"Du nimmst auf 6 an und rückst danach auf 5 vor, oder bleibst zur Abwehr auf 6."},
-      6:{pos:1,text:"Du nimmst auf 1 an und wechselst danach mit dem Libero auf 5, oder bleibst zur Abwehr auf 6."}
+      1:{pos:2,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-I-5-1024x1024.jpg",text:"Du nimmst zunächst auf Position 1 an, greifst danach von der 2 an. Nach dem ersten Angriff kannst du mit dem Diagonalspieler die Seite wechseln."},
+      2:{pos:3,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-II-2-1024x1024.jpg",text:"Du stehst rechts vom Mittelblocker, nimmst auf 5 an und wechselst danach zur 4, um dort anzugreifen."},
+      3:{pos:4,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-III-2-1024x1024.jpg",text:"Du nimmst zunächst auf 5 an und greifst anschließend vorne von der 4 an."},
+      4:{pos:5,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-IV-3-1024x1024.jpg",text:"Du bist Teil der Abwehr/Annahme im Hinterfeld zwischen 5 und 6 — flexibel je nach Zuspielerposition."},
+      5:{pos:6,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-V-2-1024x1024.jpg",text:"Du nimmst auf 6 an und rückst danach auf 5 vor, oder bleibst zur Abwehr auf 6."},
+      6:{pos:1,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-VI-6-1024x1024.jpg",text:"Du nimmst auf 1 an und wechselst danach mit dem Libero auf 5, oder bleibst zur Abwehr auf 6."}
     }
   },
   AA2: { label:"Außenangreifer (hinten)", short:"AA2",
     role_tip:"Rückraum-Außen — nach der Annahme oft als Pipe-Angreifer von der 6 im Einsatz.",
     rot:{
-      1:{pos:5,text:"Du nimmst auf 5 an und wechselst danach auf 6, oder bleibst dort zur Abwehr."},
-      2:{pos:6,text:"Du nimmst auf 6 an und rückst danach auf 5 vor oder bleibst zur Abwehr dort."},
-      3:{pos:1,text:"Du stehst rechts vom Diagonalspieler, nimmst auf 1 an und wechselst danach in die Abwehr auf 5 oder 6."},
-      4:{pos:2,text:"Du stehst rechts von Mittelblocker und Zuspieler, nimmst auf 5 an und gehst danach zur 4 zum Angreifen."},
-      5:{pos:3,text:"Du nimmst auf 5 an und wechselst zur 4 zum Angreifen — dabei musst du rechts vom vorderen Mittelblocker stehen."},
-      6:{pos:4,text:"Du nimmst auf 5 an und gehst danach sofort nach vorne zur 4, um dort anzugreifen."}
+      1:{pos:5,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-I-7-1024x1024.jpg",text:"Du nimmst auf 5 an und wechselst danach auf 6, oder bleibst dort zur Abwehr."},
+      2:{pos:6,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-II-3-1024x1024.jpg",text:"Du nimmst auf 6 an und rückst danach auf 5 vor oder bleibst zur Abwehr dort."},
+      3:{pos:1,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-III-3-1024x1024.jpg",text:"Du stehst rechts vom Diagonalspieler, nimmst auf 1 an und wechselst danach in die Abwehr auf 5 oder 6."},
+      4:{pos:2,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-IV-4-1024x1024.jpg",text:"Du stehst rechts von Mittelblocker und Zuspieler, nimmst auf 5 an und gehst danach zur 4 zum Angreifen."},
+      5:{pos:3,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-V-3-1024x1024.jpg",text:"Du nimmst auf 5 an und wechselst zur 4 zum Angreifen — dabei musst du rechts vom vorderen Mittelblocker stehen."},
+      6:{pos:4,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-VI-7-1024x1024.jpg",text:"Du nimmst auf 5 an und gehst danach sofort nach vorne zur 4, um dort anzugreifen."}
     }
   },
   DIA: { label:"Diagonalangreifer", short:"DIA",
     role_tip:"Reiner Angriffsspezialist — im klassischen System <b>kein Teil der Annahme</b>, greift aber von vorne und hinten an.",
     rot:{
-      1:{pos:4,text:"Du stehst vorne und greifst von der 4 an. Nach dem ersten Angriff kannst du optional mit dem Außenangreifer (2) die Seite tauschen."},
-      2:{pos:5,text:"Kein Teil der Annahme: du stehst links vom Außenangreifer im Hinterfeld und greifst von dort als Pipe-Angreifer an."},
-      3:{pos:6,text:"Kein Teil der Annahme: du stehst links von der Außen-Annahme und greifst als Hinterfeld-Angreifer an."},
-      4:{pos:1,text:"Kein Teil der Annahme: du stehst rechts neben dem Libero und greifst von rechts hinten als Pipe-Angreifer an."},
-      5:{pos:2,text:"Du stehst vorne auf Position 2 und kannst von dort sofort angreifen."},
-      6:{pos:3,text:"Du stehst vorne links vom Mittelblocker, vor dem Zuspieler, und gehst zur 2 für deinen Angriff."}
+      1:{pos:4,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-I-8-1024x1024.jpg",text:"Du stehst vorne und greifst von der 4 an. Nach dem ersten Angriff kannst du optional mit dem Außenangreifer (2) die Seite tauschen."},
+      2:{pos:5,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-II-4-1024x1024.jpg",text:"Kein Teil der Annahme: du stehst links vom Außenangreifer im Hinterfeld und greifst von dort als Pipe-Angreifer an."},
+      3:{pos:6,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-III-4-1024x1024.jpg",text:"Kein Teil der Annahme: du stehst links von der Außen-Annahme und greifst als Hinterfeld-Angreifer an."},
+      4:{pos:1,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-IV-5-1024x1024.jpg",text:"Kein Teil der Annahme: du stehst rechts neben dem Libero und greifst von rechts hinten als Pipe-Angreifer an."},
+      5:{pos:2,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-V-4-1024x1024.jpg",text:"Du stehst vorne auf Position 2 und kannst von dort sofort angreifen."},
+      6:{pos:3,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-VI-8-1024x1024.jpg",text:"Du stehst vorne links vom Mittelblocker, vor dem Zuspieler, und gehst zur 2 für deinen Angriff."}
     }
   }
 };
@@ -391,7 +392,7 @@ function renderLearn(){
     </div>
     <h1 class="step-title">Lernmodus</h1>
     ${dialHTML(step)}
-    <div class="court-shell">${courtSVG({target:data.pos})}</div>
+    <div class="court-shell">${data.img ? `<img class="rotation-photo" src="${data.img}" alt="Aufstellung Läufer-${step}" loading="lazy">` : courtSVG({target:data.pos})}</div>
     <div class="info-card">
       <div class="tag2">Läufer-${step} · Position ${data.pos}</div>
       <p>${data.text}</p>
