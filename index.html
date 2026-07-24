@@ -166,8 +166,10 @@ svg.formation .row-divider{ stroke:#ffffff; stroke-width:2; }
 svg.formation .net-label{ fill:#1a1a1a; font-weight:700; }
 .player{ fill:#4a4a4a; }
 .player.focus{ fill:var(--accent); stroke:#1a1a1a; stroke-width:3; }
-.player-label{ font-weight:800; font-size:20px; fill:#ffffff; pointer-events:none; }
+.player-label{ font-weight:800; font-size:19px; fill:#ffffff; pointer-events:none; }
 .player-label.focus{ fill:#1a1a1a; }
+.player-num-bg{ fill:#ffffff; stroke:#1a1a1a; stroke-width:1; }
+.player-num{ font-weight:700; font-size:13px; fill:#1a1a1a; pointer-events:none; }
 .move-arrow{ fill:none; stroke:#1a1a1a; stroke-width:2.5; stroke-dasharray:5 5; }
 .arrow-head{ fill:#1a1a1a; }
 
@@ -323,7 +325,7 @@ const ZONE_LAYOUT = {
   5:{x:0,  y:160,w:120,h:140}, 6:{x:120,y:160,w:120,h:140}, 1:{x:240,y:160,w:120,h:140}
 };
 
-const SHORT_LABEL = { Z:"Z", MB1:"MB", MB2:"MB", AA1:"A", AA2:"A", DIA:"D" };
+const SHORT_LABEL = { Z:"Z", MB1:"MB", MB2:"L", AA1:"AA", AA2:"AA", DIA:"D" };
 
 /* ---------------- STATE ---------------- */
 let state = { screen:"home", role:null, learnIndex:0, quiz:{ order:[], idx:0, score:0, answered:false } };
@@ -340,8 +342,8 @@ function formationSVG(step, focusKey){
   let arrow = "";
   if(focusData.zielPos && focusData.zielPos !== focusData.pos){
     const from = ZONE_LAYOUT[focusData.pos], to = ZONE_LAYOUT[focusData.zielPos];
-    const fx = from.x+from.w/2, fy = from.y+from.h/2;
-    const tx = to.x+to.w/2, ty = to.y+to.h/2;
+    const fx = from.x+from.w/2, fy = from.y+from.h/2-6;
+    const tx = to.x+to.w/2, ty = to.y+to.h/2-6;
     const mx = (fx+tx)/2, my = (fy+ty)/2 - 36;
     arrow = `<path class="move-arrow" d="M${fx},${fy} Q${mx},${my} ${tx},${ty}" marker-end="url(#arrowhead)"/>`;
   }
@@ -354,8 +356,10 @@ function formationSVG(step, focusKey){
     const occKey = positions[n];
     const isFocus = occKey === focusKey;
     const r = isFocus ? 34 : 30;
-    circles += `<circle class="player ${isFocus?'focus':''}" cx="${cx}" cy="${cy}" r="${r}"/>`;
-    circles += `<text class="player-label ${isFocus?'focus':''}" x="${cx}" y="${cy+7}" text-anchor="middle">${occKey ? SHORT_LABEL[occKey] : ''}</text>`;
+    circles += `<circle class="player ${isFocus?'focus':''}" cx="${cx}" cy="${cy-6}" r="${r}"/>`;
+    circles += `<text class="player-label ${isFocus?'focus':''}" x="${cx}" y="${cy+1}" text-anchor="middle">${occKey ? SHORT_LABEL[occKey] : ''}</text>`;
+    circles += `<circle class="player-num-bg" cx="${cx}" cy="${cy+r-8}" r="12"/>`;
+    circles += `<text class="player-num" x="${cx}" y="${cy+r-4}" text-anchor="middle">${n}</text>`;
   }
 
   return `<svg class="court formation" viewBox="0 0 360 305" xmlns="http://www.w3.org/2000/svg">
