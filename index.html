@@ -159,6 +159,22 @@ html[data-theme="light"] .zone{ fill: rgba(0,0,0,0.03); }
 .net-line{ stroke:var(--card-border); stroke-width:5; }
 .net-label{ font-size:11px; fill:var(--text-dim); letter-spacing:.15em; font-weight:600; }
 
+/* Formation (echte Aufstellung mit Rollen) */
+svg.formation .court-bg{ fill:#f5c518; }
+svg.formation .net-line{ stroke:#ffffff; stroke-width:5; }
+svg.formation .row-divider{ stroke:#ffffff; stroke-width:2; }
+svg.formation .net-label{ fill:#1a1a1a; font-weight:700; }
+.player{ fill:#4a4a4a; }
+.player.focus{ fill:var(--accent); stroke:#1a1a1a; stroke-width:3; }
+.player-label{ font-weight:800; font-size:20px; fill:#ffffff; pointer-events:none; }
+.player-label.focus{ fill:#1a1a1a; }
+.move-arrow{ fill:none; stroke:#1a1a1a; stroke-width:2.5; stroke-dasharray:5 5; }
+.arrow-head{ fill:#1a1a1a; }
+
+.skip-row{ display:flex; justify-content:center; margin-top:14px; }
+.skip-btn{ font-size:0.85rem; color:var(--text-dim); text-decoration:underline; text-underline-offset:3px; }
+.skip-btn:hover{ color:var(--accent); background:none; }
+
 .info-card{
   background:var(--card-bg); border:1px solid var(--card-border); border-radius:20px;
   padding:22px; margin-top:6px; box-shadow:0 4px 18px rgba(0,0,0,0.1);
@@ -240,62 +256,62 @@ html[data-theme="light"] .zone{ fill: rgba(0,0,0,0.03); }
 const ROLES = {
   Z: { label:"Zuspieler", short:"Z",
     rot:{
-      1:{pos:1, von:"Position 1, hinter dem Annahmeriegel.", wohin:"Bleibt zum Zuspiel bereit, kein langer Laufweg nötig.", regeln:["Drei Angreifer vorne nutzen (Außen 2 + Mitte 3)","Außen von Position 5 kann als Pipe-Angreifer im Hinterfeld eingesetzt werden"]},
-      2:{pos:2, von:"Position 2.", wohin:"Bleibt einfach stehen, kein Laufweg nötig.", regeln:["Zwei Angreifer vorne nutzen","Diagonalspieler als zusätzliche Hinterfeld-Option einplanen"]},
-      3:{pos:3, von:"Position 3, links neben dem Mittelblocker.", wohin:"Tauscht nach dem Aufschlag die Position mit dem Mittelblocker.", regeln:["Sofort nach dem eigenen Aufschlag die Position mit dem MB tauschen","MB muss danach wieder mittig am Netz stehen"]},
-      4:{pos:4, von:"Position 4, links von Mittelblocker und Außenangreifer.", wohin:"Muss zum Zuspielort laufen — lange Distanz.", regeln:["Schon beim gegnerischen Schlagmoment losspurten","Nicht zu spät starten, da der Weg lang ist"]},
-      5:{pos:5, von:"Position 5, hinter dem Mittelblocker, links von der Außen-Annahme.", wohin:"Löst sich zum Netz — kurzer Laufweg.", regeln:["Rechtzeitig lösen und zum Zuspielort bewegen"]},
-      6:{pos:6, von:"Position 6, zwischen hinterem MB/Libero und Außenangreifer, hinter dem Diagonalspieler.", wohin:"Bleibt an Position und spielt direkt zu.", regeln:["Direktes Zuspiel von hier möglich, kein Laufweg nötig"]}
+      1:{pos:1, zielPos:1, von:"Position 1, hinter dem Annahmeriegel.", wohin:"Bleibt zum Zuspiel bereit, kein langer Laufweg nötig.", regeln:["Drei Angreifer vorne nutzen (Außen 2 + Mitte 3)","Außen von Position 5 kann als Pipe-Angreifer im Hinterfeld eingesetzt werden"]},
+      2:{pos:2, zielPos:2, von:"Position 2.", wohin:"Bleibt einfach stehen, kein Laufweg nötig.", regeln:["Zwei Angreifer vorne nutzen","Diagonalspieler als zusätzliche Hinterfeld-Option einplanen"]},
+      3:{pos:3, zielPos:3, von:"Position 3, links neben dem Mittelblocker.", wohin:"Tauscht nach dem Aufschlag die Position mit dem Mittelblocker.", regeln:["Sofort nach dem eigenen Aufschlag die Position mit dem MB tauschen","MB muss danach wieder mittig am Netz stehen"]},
+      4:{pos:4, zielPos:4, von:"Position 4, links von Mittelblocker und Außenangreifer.", wohin:"Muss zum Zuspielort laufen — lange Distanz.", regeln:["Schon beim gegnerischen Schlagmoment losspurten","Nicht zu spät starten, da der Weg lang ist"]},
+      5:{pos:5, zielPos:5, von:"Position 5, hinter dem Mittelblocker, links von der Außen-Annahme.", wohin:"Löst sich zum Netz — kurzer Laufweg.", regeln:["Rechtzeitig lösen und zum Zuspielort bewegen"]},
+      6:{pos:6, zielPos:6, von:"Position 6, zwischen hinterem MB/Libero und Außenangreifer, hinter dem Diagonalspieler.", wohin:"Bleibt an Position und spielt direkt zu.", regeln:["Direktes Zuspiel von hier möglich, kein Laufweg nötig"]}
     }
   },
   MB1: { label:"Mittelblocker (vorne)", short:"MB1",
     rot:{
-      1:{pos:3, von:"Position 3, vorne mittig.", wohin:"Bleibt am Netz für den Angriff über die 3.", regeln:["Nur kurze Bälle in der Annahme übernehmen","Sofort angriffsbereit bleiben"]},
-      2:{pos:4, von:"Position 4, links vom Außenangreifer.", wohin:"Läuft nach der Annahme sofort zur 3.", regeln:["Kurze Bälle selbst annehmen","Danach zügig zur 3 laufen"]},
-      3:{pos:5, von:"Position 5, im Hinterfeld.", wohin:"Bleibt zur Abwehr auf 5 oder wechselt auf 6.", regeln:["Nach Absprache mit dem Team ggf. auf 6 wechseln"]},
-      4:{pos:6, von:"Position 6, hinten mittig.", wohin:"Wechselt nach der Annahme in die Abwehr, meist auf 5.", regeln:["Nach der Annahme zügig Richtung 5 orientieren"]},
-      5:{pos:1, von:"Position 1.", wohin:"Wechselt nach der Annahme in die Abwehr.", regeln:["Hier übernimmt oft der Libero die Position"]},
-      6:{pos:2, von:"Position 2, rechts vom Diagonalangreifer.", wohin:"Läuft direkt mittig zur 3 für den Schnellangriff.", regeln:["Nach der Annahme sofort zur 3 für den Schnellangriff"]}
+      1:{pos:3, zielPos:3, von:"Position 3, vorne mittig.", wohin:"Bleibt am Netz für den Angriff über die 3.", regeln:["Nur kurze Bälle in der Annahme übernehmen","Sofort angriffsbereit bleiben"]},
+      2:{pos:4, zielPos:3, von:"Position 4, links vom Außenangreifer.", wohin:"Läuft nach der Annahme sofort zur 3.", regeln:["Kurze Bälle selbst annehmen","Danach zügig zur 3 laufen"]},
+      3:{pos:5, zielPos:5, von:"Position 5, im Hinterfeld.", wohin:"Bleibt zur Abwehr auf 5 oder wechselt auf 6.", regeln:["Nach Absprache mit dem Team ggf. auf 6 wechseln"]},
+      4:{pos:6, zielPos:5, von:"Position 6, hinten mittig.", wohin:"Wechselt nach der Annahme in die Abwehr, meist auf 5.", regeln:["Nach der Annahme zügig Richtung 5 orientieren"]},
+      5:{pos:1, zielPos:1, von:"Position 1.", wohin:"Wechselt nach der Annahme in die Abwehr.", regeln:["Hier übernimmt oft der Libero die Position"]},
+      6:{pos:2, zielPos:3, von:"Position 2, rechts vom Diagonalangreifer.", wohin:"Läuft direkt mittig zur 3 für den Schnellangriff.", regeln:["Nach der Annahme sofort zur 3 für den Schnellangriff"]}
     }
   },
   MB2: { label:"Mittelblocker (hinten) / Libero", short:"MB2",
     rot:{
-      1:{pos:6, von:"Position 6, hinten mittig.", wohin:"Bleibt zur Abwehr auf 6, optional auf 5.", regeln:["Optional auf 5 abwehren, je nach Zuspiel"]},
-      2:{pos:1, von:"Position 1.", wohin:"Wechselt nach der Annahme in die Abwehr auf 5 oder 6.", regeln:["Klassischer Einsatzort für den Libero"]},
-      3:{pos:2, von:"Position 2.", wohin:"Tauscht die Position mit dem Zuspieler.", regeln:["Kann danach sofort angreifen","Auch ein Angriff über Kopf ist hier möglich"]},
-      4:{pos:3, von:"Position 3, vorne mittig zwischen Zuspieler und Außenangreifer.", wohin:"Bleibt direkt angriffsbereit.", regeln:["Sofort angriffsbereit sein"]},
-      5:{pos:4, von:"Position 4, links vom Außenangreifer.", wohin:"Läuft nach der Annahme sofort zur 3.", regeln:["Zügig zur 3 zum Angreifen wechseln"]},
-      6:{pos:5, von:"Position 5.", wohin:"Bleibt zur Abwehr auf 5, optional auf 6.", regeln:["Optional auf 6 rücken, je nach Spielsituation"]}
+      1:{pos:6, zielPos:6, von:"Position 6, hinten mittig.", wohin:"Bleibt zur Abwehr auf 6, optional auf 5.", regeln:["Optional auf 5 abwehren, je nach Zuspiel"]},
+      2:{pos:1, zielPos:5, von:"Position 1.", wohin:"Wechselt nach der Annahme in die Abwehr auf 5 oder 6.", regeln:["Klassischer Einsatzort für den Libero"]},
+      3:{pos:2, zielPos:2, von:"Position 2.", wohin:"Tauscht die Position mit dem Zuspieler.", regeln:["Kann danach sofort angreifen","Auch ein Angriff über Kopf ist hier möglich"]},
+      4:{pos:3, zielPos:3, von:"Position 3, vorne mittig zwischen Zuspieler und Außenangreifer.", wohin:"Bleibt direkt angriffsbereit.", regeln:["Sofort angriffsbereit sein"]},
+      5:{pos:4, zielPos:3, von:"Position 4, links vom Außenangreifer.", wohin:"Läuft nach der Annahme sofort zur 3.", regeln:["Zügig zur 3 zum Angreifen wechseln"]},
+      6:{pos:5, zielPos:5, von:"Position 5.", wohin:"Bleibt zur Abwehr auf 5, optional auf 6.", regeln:["Optional auf 6 rücken, je nach Spielsituation"]}
     }
   },
   AA1: { label:"Außenangreifer (vorne)", short:"AA1",
     rot:{
-      1:{pos:2, von:"Position 1 (Annahme).", wohin:"Wechselt zur 2 für den Angriff.", regeln:["Nach dem ersten Angriff optional die Seite mit dem Diagonalspieler tauschen"]},
-      2:{pos:3, von:"Position 3, rechts vom Mittelblocker.", wohin:"Nimmt auf 5 an, wechselt danach zur 4.", regeln:["Nach der Annahme zügig zur 4 wechseln"]},
-      3:{pos:4, von:"Position 4.", wohin:"Nimmt auf 5 an, greift dann von der 4 an.", regeln:["Nach der Annahme nach vorne zur 4 bewegen"]},
-      4:{pos:5, von:"Position 5, im Hinterfeld.", wohin:"Bleibt flexibel zwischen 5 und 6.", regeln:["Position je nach Zuspieler-Standort anpassen"]},
-      5:{pos:6, von:"Position 6.", wohin:"Nimmt auf 6 an, rückt danach auf 5 vor oder bleibt zur Abwehr.", regeln:["Nach der Annahme entscheiden: vorrücken oder abwehren"]},
-      6:{pos:1, von:"Position 1.", wohin:"Nimmt auf 1 an, wechselt danach mit dem Libero auf 5 oder bleibt zur Abwehr auf 6.", regeln:["Wechsel mit dem Libero beachten"]}
+      1:{pos:2, zielPos:2, von:"Position 1 (Annahme).", wohin:"Wechselt zur 2 für den Angriff.", regeln:["Nach dem ersten Angriff optional die Seite mit dem Diagonalspieler tauschen"]},
+      2:{pos:3, zielPos:5, von:"Position 3, rechts vom Mittelblocker.", wohin:"Nimmt auf 5 an, wechselt danach zur 4.", regeln:["Nach der Annahme zügig zur 4 wechseln"]},
+      3:{pos:4, zielPos:5, von:"Position 4.", wohin:"Nimmt auf 5 an, greift dann von der 4 an.", regeln:["Nach der Annahme nach vorne zur 4 bewegen"]},
+      4:{pos:5, zielPos:5, von:"Position 5, im Hinterfeld.", wohin:"Bleibt flexibel zwischen 5 und 6.", regeln:["Position je nach Zuspieler-Standort anpassen"]},
+      5:{pos:6, zielPos:6, von:"Position 6.", wohin:"Nimmt auf 6 an, rückt danach auf 5 vor oder bleibt zur Abwehr.", regeln:["Nach der Annahme entscheiden: vorrücken oder abwehren"]},
+      6:{pos:1, zielPos:1, von:"Position 1.", wohin:"Nimmt auf 1 an, wechselt danach mit dem Libero auf 5 oder bleibt zur Abwehr auf 6.", regeln:["Wechsel mit dem Libero beachten"]}
     }
   },
   AA2: { label:"Außenangreifer (hinten)", short:"AA2",
     rot:{
-      1:{pos:5, von:"Position 5.", wohin:"Nimmt auf 5 an, wechselt danach auf 6 oder bleibt zur Abwehr.", regeln:["Nach der Annahme je nach Situation entscheiden"]},
-      2:{pos:6, von:"Position 6.", wohin:"Nimmt auf 6 an, rückt danach auf 5 vor oder bleibt zur Abwehr.", regeln:["Flexibel je nach Spielsituation reagieren"]},
-      3:{pos:1, von:"Position 1, rechts vom Diagonalspieler.", wohin:"Nimmt auf 1 an, wechselt danach in die Abwehr auf 5 oder 6.", regeln:["Nach der Annahme in die Abwehr wechseln"]},
-      4:{pos:2, von:"Position 2, rechts von Mittelblocker und Zuspieler.", wohin:"Nimmt auf 5 an, geht danach zur 4 zum Angreifen.", regeln:["Nach der Annahme zügig zur 4 bewegen"]},
-      5:{pos:3, von:"Position 3.", wohin:"Nimmt auf 5 an, wechselt zur 4 zum Angreifen.", regeln:["Muss rechts vom vorderen Mittelblocker stehen"]},
-      6:{pos:4, von:"Position 4.", wohin:"Nimmt auf 5 an, geht danach sofort nach vorne zur 4.", regeln:["Zügig nach vorne zur 4 zum Angreifen bewegen"]}
+      1:{pos:5, zielPos:5, von:"Position 5.", wohin:"Nimmt auf 5 an, wechselt danach auf 6 oder bleibt zur Abwehr.", regeln:["Nach der Annahme je nach Situation entscheiden"]},
+      2:{pos:6, zielPos:6, von:"Position 6.", wohin:"Nimmt auf 6 an, rückt danach auf 5 vor oder bleibt zur Abwehr.", regeln:["Flexibel je nach Spielsituation reagieren"]},
+      3:{pos:1, zielPos:1, von:"Position 1, rechts vom Diagonalspieler.", wohin:"Nimmt auf 1 an, wechselt danach in die Abwehr auf 5 oder 6.", regeln:["Nach der Annahme in die Abwehr wechseln"]},
+      4:{pos:2, zielPos:5, von:"Position 2, rechts von Mittelblocker und Zuspieler.", wohin:"Nimmt auf 5 an, geht danach zur 4 zum Angreifen.", regeln:["Nach der Annahme zügig zur 4 bewegen"]},
+      5:{pos:3, zielPos:5, von:"Position 3.", wohin:"Nimmt auf 5 an, wechselt zur 4 zum Angreifen.", regeln:["Muss rechts vom vorderen Mittelblocker stehen"]},
+      6:{pos:4, zielPos:5, von:"Position 4.", wohin:"Nimmt auf 5 an, geht danach sofort nach vorne zur 4.", regeln:["Zügig nach vorne zur 4 zum Angreifen bewegen"]}
     }
   },
   DIA: { label:"Diagonalangreifer", short:"DIA",
     rot:{
-      1:{pos:4, von:"Position 4, vorne.", wohin:"Greift von der 4 an.", regeln:["Kein Teil der Annahme","Optional Seitenwechsel mit Außenangreifer nach dem ersten Angriff"]},
-      2:{pos:5, von:"Position 5, links vom Außenangreifer im Hinterfeld.", wohin:"Greift als Pipe-Angreifer von dort an.", regeln:["Kein Teil der Annahme"]},
-      3:{pos:6, von:"Position 6, links von der Außen-Annahme.", wohin:"Greift als Hinterfeld-Angreifer an.", regeln:["Kein Teil der Annahme"]},
-      4:{pos:1, von:"Position 1, rechts neben dem Libero.", wohin:"Greift von rechts hinten als Pipe-Angreifer an.", regeln:["Kein Teil der Annahme"]},
-      5:{pos:2, von:"Position 2, vorne.", wohin:"Kann direkt von dort angreifen.", regeln:["Sofort angriffsbereit sein"]},
-      6:{pos:3, von:"Position 3, links vom Mittelblocker, vor dem Zuspieler.", wohin:"Wechselt zur 2 für den Angriff.", regeln:["Zügig zur 2 wechseln"]}
+      1:{pos:4, zielPos:4, von:"Position 4, vorne.", wohin:"Greift von der 4 an.", regeln:["Kein Teil der Annahme","Optional Seitenwechsel mit Außenangreifer nach dem ersten Angriff"]},
+      2:{pos:5, zielPos:5, von:"Position 5, links vom Außenangreifer im Hinterfeld.", wohin:"Greift als Pipe-Angreifer von dort an.", regeln:["Kein Teil der Annahme"]},
+      3:{pos:6, zielPos:6, von:"Position 6, links von der Außen-Annahme.", wohin:"Greift als Hinterfeld-Angreifer an.", regeln:["Kein Teil der Annahme"]},
+      4:{pos:1, zielPos:1, von:"Position 1, rechts neben dem Libero.", wohin:"Greift von rechts hinten als Pipe-Angreifer an.", regeln:["Kein Teil der Annahme"]},
+      5:{pos:2, zielPos:2, von:"Position 2, vorne.", wohin:"Kann direkt von dort angreifen.", regeln:["Sofort angriffsbereit sein"]},
+      6:{pos:3, zielPos:2, von:"Position 3, links vom Mittelblocker, vor dem Zuspieler.", wohin:"Wechselt zur 2 für den Angriff.", regeln:["Zügig zur 2 wechseln"]}
     }
   }
 };
@@ -307,10 +323,56 @@ const ZONE_LAYOUT = {
   5:{x:0,  y:160,w:120,h:140}, 6:{x:120,y:160,w:120,h:140}, 1:{x:240,y:160,w:120,h:140}
 };
 
+const SHORT_LABEL = { Z:"Z", MB1:"MB", MB2:"MB", AA1:"A", AA2:"A", DIA:"D" };
+
 /* ---------------- STATE ---------------- */
 let state = { screen:"home", role:null, learnIndex:0, quiz:{ order:[], idx:0, score:0, answered:false } };
 
 /* ---------------- HELPERS ---------------- */
+function formationSVG(step, focusKey){
+  const positions = {};
+  for(const key in ROLES){
+    const rd = ROLES[key].rot[step];
+    positions[rd.pos] = key;
+  }
+  const focusData = ROLES[focusKey].rot[step];
+
+  let arrow = "";
+  if(focusData.zielPos && focusData.zielPos !== focusData.pos){
+    const from = ZONE_LAYOUT[focusData.pos], to = ZONE_LAYOUT[focusData.zielPos];
+    const fx = from.x+from.w/2, fy = from.y+from.h/2;
+    const tx = to.x+to.w/2, ty = to.y+to.h/2;
+    const mx = (fx+tx)/2, my = (fy+ty)/2 - 36;
+    arrow = `<path class="move-arrow" d="M${fx},${fy} Q${mx},${my} ${tx},${ty}" marker-end="url(#arrowhead)"/>`;
+  }
+
+  let circles = "";
+  for(const num in ZONE_LAYOUT){
+    const n = Number(num);
+    const z = ZONE_LAYOUT[num];
+    const cx = z.x + z.w/2, cy = z.y + z.h/2;
+    const occKey = positions[n];
+    const isFocus = occKey === focusKey;
+    const r = isFocus ? 34 : 30;
+    circles += `<circle class="player ${isFocus?'focus':''}" cx="${cx}" cy="${cy}" r="${r}"/>`;
+    circles += `<text class="player-label ${isFocus?'focus':''}" x="${cx}" y="${cy+7}" text-anchor="middle">${occKey ? SHORT_LABEL[occKey] : ''}</text>`;
+  }
+
+  return `<svg class="court formation" viewBox="0 0 360 305" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+        <path d="M0,0 L8,4 L0,8 z" class="arrow-head"/>
+      </marker>
+    </defs>
+    <rect class="court-bg" x="0" y="16" width="360" height="289" rx="4"/>
+    <line class="row-divider" x1="0" y1="160" x2="360" y2="160"/>
+    <line class="net-line" x1="0" y1="16" x2="360" y2="16"/>
+    <text class="net-label" x="180" y="10" text-anchor="middle">NETZ</text>
+    ${arrow}
+    ${circles}
+  </svg>`;
+}
+
 function courtSVG({target=null, clickable=false, correctZone=null, pickedZone=null}={}){
   let zones = "";
   for(const num in ZONE_LAYOUT){
@@ -372,7 +434,7 @@ function renderLearn(){
     </div>
     <h1 class="step-title">Lernmodus</h1>
     <div class="laeufer-badge">Läufer ${step}</div>
-    <div class="court-shell">${courtSVG({target:data.pos})}</div>
+    <div class="court-shell">${formationSVG(step, state.role)}</div>
     <div class="info-card">
       <div class="info-row">
         <div class="info-label">Von wo</div>
@@ -392,6 +454,9 @@ function renderLearn(){
       ${idx===LEARN_ORDER.length-1
         ? `<button class="btn" data-action="start-quiz">Weiter zum Quiz →</button>`
         : `<button class="btn" data-action="learn-next">Weiter →</button>`}
+    </div>
+    <div class="skip-row">
+      <button class="btn-ghost skip-btn" data-action="start-quiz">Regelwerk überspringen · direkt zum Quiz →</button>
     </div>
   `;
 }
@@ -465,8 +530,9 @@ function attachEvents(){
   const next = document.querySelector('[data-action="learn-next"]');
   if(next) next.addEventListener("click", ()=>{ state.learnIndex = Math.min(LEARN_ORDER.length-1,state.learnIndex+1); render(); });
 
-  const startQuiz = document.querySelector('[data-action="start-quiz"]');
-  if(startQuiz) startQuiz.addEventListener("click", ()=>{ beginQuiz(); });
+  document.querySelectorAll('[data-action="start-quiz"]').forEach(el=>{
+    el.addEventListener("click", ()=>{ beginQuiz(); });
+  });
 
   const learnAgain = document.querySelector('[data-action="learn-again"]');
   if(learnAgain) learnAgain.addEventListener("click", ()=>{ state.screen="learn"; state.learnIndex=0; render(); });
