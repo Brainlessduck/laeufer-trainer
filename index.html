@@ -136,21 +136,11 @@ p.sub{ color:var(--text-dim); line-height:1.75; font-size:1.02rem; max-width:56c
 .role-card p{ color:var(--text-dim); font-size:0.85rem; line-height:1.5; margin:0; }
 
 /* Rotation dial */
-.dial-wrap{ display:flex; justify-content:center; margin:22px 0 6px; }
-.dial{ position:relative; width:210px; height:210px; }
-.dial-node{
-  position:absolute; width:38px; height:38px; border-radius:50%;
-  background:var(--card-bg); border:2px solid var(--card-border);
-  display:flex; align-items:center; justify-content:center;
-  font-weight:700; font-size:14px; color:var(--text-dim); cursor:pointer;
-  transition:.15s;
-}
-.dial-node:hover{ border-color:var(--link-blue); color:var(--text); }
-.dial-node.active{ background:var(--accent); border-color:var(--accent); color:#1a1a1a; transform:scale(1.14); }
-.dial-center{
-  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-  text-align:center; font-size:11px; color:var(--text-dim);
-  letter-spacing:.06em; text-transform:uppercase; width:70px; font-weight:700;
+.laeufer-badge{
+  display:block; width:fit-content; margin:22px auto 6px;
+  background:var(--card-bg); border:1px solid var(--card-border);
+  color:var(--accent); font-weight:800; font-size:1.15rem;
+  padding:10px 26px; border-radius:14px; letter-spacing:0.5px;
 }
 
 /* Court */
@@ -173,9 +163,13 @@ html[data-theme="light"] .zone{ fill: rgba(0,0,0,0.03); }
   background:var(--card-bg); border:1px solid var(--card-border); border-radius:20px;
   padding:22px; margin-top:6px; box-shadow:0 4px 18px rgba(0,0,0,0.1);
 }
-.info-card .tag2{ font-size:0.75rem; font-weight:700; color:#1a1a1a; background:var(--accent); padding:4px 10px; border-radius:6px; display:inline-block; margin-bottom:10px;}
+.info-row{ margin-bottom:16px; }
+.info-row:last-child{ margin-bottom:0; }
+.info-label{ font-size:0.7rem; font-weight:800; color:var(--accent); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:5px; }
 .info-card p{ color:var(--text-dim); line-height:1.65; font-size:15px; margin:0; }
 .info-card p b{ color:var(--accent); }
+.regeln-list{ color:var(--text-dim); line-height:1.65; font-size:15px; padding-left:20px; margin:0; }
+.regeln-list li{ margin-bottom:4px; }
 
 .nav-row{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:24px; }
 .btn{
@@ -245,72 +239,68 @@ html[data-theme="light"] .zone{ fill: rgba(0,0,0,0.03); }
 /* ---------------- DATA ---------------- */
 const ROLES = {
   Z: { label:"Zuspieler", short:"Z",
-    role_tip:"Der Dreh- und Angelpunkt des Systems: muss von jeder der sechs Positionen aus zuverlässig zuspielen können.",
     rot:{
-      1:{pos:1,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-I-1024x1024.jpg",text:"Du stehst hinter dem Annahmeriegel. Nach der Annahme hast du <b>drei Angreifer vorne</b> (Außen 2 + Mitte 3) — dazu wird der Außen von Position 5 oft als Pipe-Angreifer im Hinterfeld eingesetzt."},
-      2:{pos:2,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-VI-4-1024x1024.jpg",text:"Die einfachste Rotation für dich: du bleibst einfach stehen und hast <b>zwei Angreifer vorne</b> sowie den Diagonalspieler als Hinterfeld-Option."},
-      3:{pos:3,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1-Annahme-Laeufer-III-zuspieler-1-1024x1024.jpg",text:"Du stehst links neben deinem Mittelblocker und <b>tauscht nach dem Aufschlag die Position</b> mit ihm, damit er wieder mittig zum Netz steht."},
-      4:{pos:4,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-IV-1024x1024.jpg",text:"Du stehst links von Mittelblocker und Außenangreifer. Die Laufdistanz zum Zuspielort ist lang — <b>lauf schon beim gegnerischen Schlagmoment los</b>."},
-      5:{pos:5,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-VI-2-1024x1024.jpg",text:"Du stehst hinter deinem Mittelblocker und links von der Außen-Annahme. Von hier ist der Weg zum Netz noch überschaubar."},
-      6:{pos:6,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-VI-1024x1024.jpg",text:"Du stehst zwischen dem hinteren Mittelblocker/Libero und dem Außenangreifer, hinter dem Diagonalspieler. Von dieser Position kannst du <b>direkt zuspielen</b>."}
+      1:{pos:1, von:"Position 1, hinter dem Annahmeriegel.", wohin:"Bleibt zum Zuspiel bereit, kein langer Laufweg nötig.", regeln:["Drei Angreifer vorne nutzen (Außen 2 + Mitte 3)","Außen von Position 5 kann als Pipe-Angreifer im Hinterfeld eingesetzt werden"]},
+      2:{pos:2, von:"Position 2.", wohin:"Bleibt einfach stehen, kein Laufweg nötig.", regeln:["Zwei Angreifer vorne nutzen","Diagonalspieler als zusätzliche Hinterfeld-Option einplanen"]},
+      3:{pos:3, von:"Position 3, links neben dem Mittelblocker.", wohin:"Tauscht nach dem Aufschlag die Position mit dem Mittelblocker.", regeln:["Sofort nach dem eigenen Aufschlag die Position mit dem MB tauschen","MB muss danach wieder mittig am Netz stehen"]},
+      4:{pos:4, von:"Position 4, links von Mittelblocker und Außenangreifer.", wohin:"Muss zum Zuspielort laufen — lange Distanz.", regeln:["Schon beim gegnerischen Schlagmoment losspurten","Nicht zu spät starten, da der Weg lang ist"]},
+      5:{pos:5, von:"Position 5, hinter dem Mittelblocker, links von der Außen-Annahme.", wohin:"Löst sich zum Netz — kurzer Laufweg.", regeln:["Rechtzeitig lösen und zum Zuspielort bewegen"]},
+      6:{pos:6, von:"Position 6, zwischen hinterem MB/Libero und Außenangreifer, hinter dem Diagonalspieler.", wohin:"Bleibt an Position und spielt direkt zu.", regeln:["Direktes Zuspiel von hier möglich, kein Laufweg nötig"]}
     }
   },
   MB1: { label:"Mittelblocker (vorne)", short:"MB1",
-    role_tip:"Orientiert sich immer Richtung Position 3 — dort greift und blockt er am liebsten.",
     rot:{
-      1:{pos:3,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-I-2-1024x1024.jpg",text:"Du stehst vorne mittig. In der Annahme übernimmst du nur <b>kurze Bälle</b> und stehst sofort für den Angriff über die 3 bereit."},
-      2:{pos:4,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-II-1024x1024.jpg",text:"Du stehst links vom Außenangreifer. Nach der Annahme <b>läufst du sofort zur 3</b>, um dort anzugreifen — kurze Bälle nimmst du selbst an."},
-      3:{pos:5,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-III-1024x1024.jpg",text:"Du bist im Hinterfeld. Nimm an und bleib zur Abwehr auf 5, oder wechsle je nach Absprache auf die 6."},
-      4:{pos:6,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-IV-1-1024x1024.jpg",text:"Du stehst hinten mittig, nimmst an und wechselst danach in die Abwehr, meist auf Position 5."},
-      5:{pos:1,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-V-1024x1024.jpg",text:"Du nimmst auf der 1 an und wechselst danach in die Abwehr — hier kommt häufig der Libero für dich ins Spiel."},
-      6:{pos:2,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-VI-1-1024x1024.jpg",text:"Du stehst rechts vom Diagonalangreifer. Nach der Annahme geht es <b>direkt mittig zur 3</b> für den Schnellangriff."}
+      1:{pos:3, von:"Position 3, vorne mittig.", wohin:"Bleibt am Netz für den Angriff über die 3.", regeln:["Nur kurze Bälle in der Annahme übernehmen","Sofort angriffsbereit bleiben"]},
+      2:{pos:4, von:"Position 4, links vom Außenangreifer.", wohin:"Läuft nach der Annahme sofort zur 3.", regeln:["Kurze Bälle selbst annehmen","Danach zügig zur 3 laufen"]},
+      3:{pos:5, von:"Position 5, im Hinterfeld.", wohin:"Bleibt zur Abwehr auf 5 oder wechselt auf 6.", regeln:["Nach Absprache mit dem Team ggf. auf 6 wechseln"]},
+      4:{pos:6, von:"Position 6, hinten mittig.", wohin:"Wechselt nach der Annahme in die Abwehr, meist auf 5.", regeln:["Nach der Annahme zügig Richtung 5 orientieren"]},
+      5:{pos:1, von:"Position 1.", wohin:"Wechselt nach der Annahme in die Abwehr.", regeln:["Hier übernimmt oft der Libero die Position"]},
+      6:{pos:2, von:"Position 2, rechts vom Diagonalangreifer.", wohin:"Läuft direkt mittig zur 3 für den Schnellangriff.", regeln:["Nach der Annahme sofort zur 3 für den Schnellangriff"]}
     }
   },
   MB2: { label:"Mittelblocker (hinten) / Libero", short:"MB2",
-    role_tip:"Rückraum-Spezialist — übernimmt die Abwehr auf 5 oder 6 und wird hier meistens vom Libero ersetzt.",
     rot:{
-      1:{pos:6,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-I-3-1024x1024.jpg",text:"Du nimmst hinten mittig an und bleibst zur Abwehr auf 6, oder wehrst optional auf 5 ab."},
-      2:{pos:1,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-II-1-1024x1024.jpg",text:"Du nimmst auf der 1 an und wechselst danach in die Abwehr auf 5 oder 6 — klassischer Einsatzort für den Libero."},
-      3:{pos:2,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-III-1-1024x1024.jpg",text:"Du tauschst die Position mit dem Zuspieler und kannst danach sofort angreifen — auch ein Angriff über Kopf ist hier möglich."},
-      4:{pos:3,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-IV-2-1024x1024.jpg",text:"Du stehst vorne mittig zwischen Zuspieler und Außenangreifer und bist direkt angriffsbereit."},
-      5:{pos:4,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-V-1-1024x1024.jpg",text:"Du stehst links vom Außenangreifer. Nach der Annahme geht es sofort zur 3, um dort anzugreifen."},
-      6:{pos:5,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-VI-5-1024x1024.jpg",text:"Du nimmst hinten an, bleibst zur Abwehr auf 5 oder rückst optional auf 6."}
+      1:{pos:6, von:"Position 6, hinten mittig.", wohin:"Bleibt zur Abwehr auf 6, optional auf 5.", regeln:["Optional auf 5 abwehren, je nach Zuspiel"]},
+      2:{pos:1, von:"Position 1.", wohin:"Wechselt nach der Annahme in die Abwehr auf 5 oder 6.", regeln:["Klassischer Einsatzort für den Libero"]},
+      3:{pos:2, von:"Position 2.", wohin:"Tauscht die Position mit dem Zuspieler.", regeln:["Kann danach sofort angreifen","Auch ein Angriff über Kopf ist hier möglich"]},
+      4:{pos:3, von:"Position 3, vorne mittig zwischen Zuspieler und Außenangreifer.", wohin:"Bleibt direkt angriffsbereit.", regeln:["Sofort angriffsbereit sein"]},
+      5:{pos:4, von:"Position 4, links vom Außenangreifer.", wohin:"Läuft nach der Annahme sofort zur 3.", regeln:["Zügig zur 3 zum Angreifen wechseln"]},
+      6:{pos:5, von:"Position 5.", wohin:"Bleibt zur Abwehr auf 5, optional auf 6.", regeln:["Optional auf 6 rücken, je nach Spielsituation"]}
     }
   },
   AA1: { label:"Außenangreifer (vorne)", short:"AA1",
-    role_tip:"Teil des Annahmeriegels — greift an, sobald er vorne am Netz steht.",
     rot:{
-      1:{pos:2,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-I-5-1024x1024.jpg",text:"Du nimmst zunächst auf Position 1 an, greifst danach von der 2 an. Nach dem ersten Angriff kannst du mit dem Diagonalspieler die Seite wechseln."},
-      2:{pos:3,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-II-2-1024x1024.jpg",text:"Du stehst rechts vom Mittelblocker, nimmst auf 5 an und wechselst danach zur 4, um dort anzugreifen."},
-      3:{pos:4,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-III-2-1024x1024.jpg",text:"Du nimmst zunächst auf 5 an und greifst anschließend vorne von der 4 an."},
-      4:{pos:5,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-IV-3-1024x1024.jpg",text:"Du bist Teil der Abwehr/Annahme im Hinterfeld zwischen 5 und 6 — flexibel je nach Zuspielerposition."},
-      5:{pos:6,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-V-2-1024x1024.jpg",text:"Du nimmst auf 6 an und rückst danach auf 5 vor, oder bleibst zur Abwehr auf 6."},
-      6:{pos:1,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-VI-6-1024x1024.jpg",text:"Du nimmst auf 1 an und wechselst danach mit dem Libero auf 5, oder bleibst zur Abwehr auf 6."}
+      1:{pos:2, von:"Position 1 (Annahme).", wohin:"Wechselt zur 2 für den Angriff.", regeln:["Nach dem ersten Angriff optional die Seite mit dem Diagonalspieler tauschen"]},
+      2:{pos:3, von:"Position 3, rechts vom Mittelblocker.", wohin:"Nimmt auf 5 an, wechselt danach zur 4.", regeln:["Nach der Annahme zügig zur 4 wechseln"]},
+      3:{pos:4, von:"Position 4.", wohin:"Nimmt auf 5 an, greift dann von der 4 an.", regeln:["Nach der Annahme nach vorne zur 4 bewegen"]},
+      4:{pos:5, von:"Position 5, im Hinterfeld.", wohin:"Bleibt flexibel zwischen 5 und 6.", regeln:["Position je nach Zuspieler-Standort anpassen"]},
+      5:{pos:6, von:"Position 6.", wohin:"Nimmt auf 6 an, rückt danach auf 5 vor oder bleibt zur Abwehr.", regeln:["Nach der Annahme entscheiden: vorrücken oder abwehren"]},
+      6:{pos:1, von:"Position 1.", wohin:"Nimmt auf 1 an, wechselt danach mit dem Libero auf 5 oder bleibt zur Abwehr auf 6.", regeln:["Wechsel mit dem Libero beachten"]}
     }
   },
   AA2: { label:"Außenangreifer (hinten)", short:"AA2",
-    role_tip:"Rückraum-Außen — nach der Annahme oft als Pipe-Angreifer von der 6 im Einsatz.",
     rot:{
-      1:{pos:5,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-I-7-1024x1024.jpg",text:"Du nimmst auf 5 an und wechselst danach auf 6, oder bleibst dort zur Abwehr."},
-      2:{pos:6,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-II-3-1024x1024.jpg",text:"Du nimmst auf 6 an und rückst danach auf 5 vor oder bleibst zur Abwehr dort."},
-      3:{pos:1,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-III-3-1024x1024.jpg",text:"Du stehst rechts vom Diagonalspieler, nimmst auf 1 an und wechselst danach in die Abwehr auf 5 oder 6."},
-      4:{pos:2,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-IV-4-1024x1024.jpg",text:"Du stehst rechts von Mittelblocker und Zuspieler, nimmst auf 5 an und gehst danach zur 4 zum Angreifen."},
-      5:{pos:3,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-V-3-1024x1024.jpg",text:"Du nimmst auf 5 an und wechselst zur 4 zum Angreifen — dabei musst du rechts vom vorderen Mittelblocker stehen."},
-      6:{pos:4,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-VI-7-1024x1024.jpg",text:"Du nimmst auf 5 an und gehst danach sofort nach vorne zur 4, um dort anzugreifen."}
+      1:{pos:5, von:"Position 5.", wohin:"Nimmt auf 5 an, wechselt danach auf 6 oder bleibt zur Abwehr.", regeln:["Nach der Annahme je nach Situation entscheiden"]},
+      2:{pos:6, von:"Position 6.", wohin:"Nimmt auf 6 an, rückt danach auf 5 vor oder bleibt zur Abwehr.", regeln:["Flexibel je nach Spielsituation reagieren"]},
+      3:{pos:1, von:"Position 1, rechts vom Diagonalspieler.", wohin:"Nimmt auf 1 an, wechselt danach in die Abwehr auf 5 oder 6.", regeln:["Nach der Annahme in die Abwehr wechseln"]},
+      4:{pos:2, von:"Position 2, rechts von Mittelblocker und Zuspieler.", wohin:"Nimmt auf 5 an, geht danach zur 4 zum Angreifen.", regeln:["Nach der Annahme zügig zur 4 bewegen"]},
+      5:{pos:3, von:"Position 3.", wohin:"Nimmt auf 5 an, wechselt zur 4 zum Angreifen.", regeln:["Muss rechts vom vorderen Mittelblocker stehen"]},
+      6:{pos:4, von:"Position 4.", wohin:"Nimmt auf 5 an, geht danach sofort nach vorne zur 4.", regeln:["Zügig nach vorne zur 4 zum Angreifen bewegen"]}
     }
   },
   DIA: { label:"Diagonalangreifer", short:"DIA",
-    role_tip:"Reiner Angriffsspezialist — im klassischen System <b>kein Teil der Annahme</b>, greift aber von vorne und hinten an.",
     rot:{
-      1:{pos:4,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-I-8-1024x1024.jpg",text:"Du stehst vorne und greifst von der 4 an. Nach dem ersten Angriff kannst du optional mit dem Außenangreifer (2) die Seite tauschen."},
-      2:{pos:5,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-II-4-1024x1024.jpg",text:"Kein Teil der Annahme: du stehst links vom Außenangreifer im Hinterfeld und greifst von dort als Pipe-Angreifer an."},
-      3:{pos:6,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-III-4-1024x1024.jpg",text:"Kein Teil der Annahme: du stehst links von der Außen-Annahme und greifst als Hinterfeld-Angreifer an."},
-      4:{pos:1,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-IV-5-1024x1024.jpg",text:"Kein Teil der Annahme: du stehst rechts neben dem Libero und greifst von rechts hinten als Pipe-Angreifer an."},
-      5:{pos:2,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-V-4-1024x1024.jpg",text:"Du stehst vorne auf Position 2 und kannst von dort sofort angreifen."},
-      6:{pos:3,img:"https://volleyball-insider.com/wp-content/uploads/2024/04/5-1_-Annahme-Laeufer-VI-8-1024x1024.jpg",text:"Du stehst vorne links vom Mittelblocker, vor dem Zuspieler, und gehst zur 2 für deinen Angriff."}
+      1:{pos:4, von:"Position 4, vorne.", wohin:"Greift von der 4 an.", regeln:["Kein Teil der Annahme","Optional Seitenwechsel mit Außenangreifer nach dem ersten Angriff"]},
+      2:{pos:5, von:"Position 5, links vom Außenangreifer im Hinterfeld.", wohin:"Greift als Pipe-Angreifer von dort an.", regeln:["Kein Teil der Annahme"]},
+      3:{pos:6, von:"Position 6, links von der Außen-Annahme.", wohin:"Greift als Hinterfeld-Angreifer an.", regeln:["Kein Teil der Annahme"]},
+      4:{pos:1, von:"Position 1, rechts neben dem Libero.", wohin:"Greift von rechts hinten als Pipe-Angreifer an.", regeln:["Kein Teil der Annahme"]},
+      5:{pos:2, von:"Position 2, vorne.", wohin:"Kann direkt von dort angreifen.", regeln:["Sofort angriffsbereit sein"]},
+      6:{pos:3, von:"Position 3, links vom Mittelblocker, vor dem Zuspieler.", wohin:"Wechselt zur 2 für den Angriff.", regeln:["Zügig zur 2 wechseln"]}
     }
   }
 };
+
+const LEARN_ORDER = [1,6,5,4,3,2];
 
 const ZONE_LAYOUT = {
   4:{x:0,  y:20, w:120,h:140}, 3:{x:120,y:20, w:120,h:140}, 2:{x:240,y:20, w:120,h:140},
@@ -318,7 +308,7 @@ const ZONE_LAYOUT = {
 };
 
 /* ---------------- STATE ---------------- */
-let state = { screen:"home", role:null, learnStep:1, quiz:{ order:[], idx:0, score:0, answered:false } };
+let state = { screen:"home", role:null, learnIndex:0, quiz:{ order:[], idx:0, score:0, answered:false } };
 
 /* ---------------- HELPERS ---------------- */
 function courtSVG({target=null, clickable=false, correctZone=null, pickedZone=null}={}){
@@ -339,18 +329,6 @@ function courtSVG({target=null, clickable=false, correctZone=null, pickedZone=nu
     <text class="net-label" x="180" y="10" text-anchor="middle">NETZ</text>
     ${zones}
   </svg>`;
-}
-
-function dialHTML(activeRot){
-  const R = 82;
-  let nodes = "";
-  for(let i=1;i<=6;i++){
-    const angle = (i-1)/6 * 2*Math.PI - Math.PI/2;
-    const x = 105 + R*Math.cos(angle) - 19;
-    const y = 105 + R*Math.sin(angle) - 19;
-    nodes += `<div class="dial-node ${i===activeRot?'active':''}" data-rot="${i}" style="left:${x}px; top:${y}px;">${i}</div>`;
-  }
-  return `<div class="dial-wrap"><div class="dial">${nodes}<div class="dial-center">Läufer</div></div></div>`;
 }
 
 function render(){
@@ -383,23 +361,35 @@ function renderHome(){
 
 function renderLearn(){
   const role = ROLES[state.role];
-  const step = state.learnStep;
+  const idx = state.learnIndex;
+  const step = LEARN_ORDER[idx];
   const data = role.rot[step];
+  const regelnList = data.regeln.map(r => `<li>${r}</li>`).join("");
   return `
     <div class="top-nav">
       <button class="btn-ghost" data-action="home">← Positionen</button>
       <div class="eyebrow">${role.label}</div>
     </div>
     <h1 class="step-title">Lernmodus</h1>
-    ${dialHTML(step)}
+    <div class="laeufer-badge">Läufer ${step}</div>
     <div class="court-shell">${courtSVG({target:data.pos})}</div>
     <div class="info-card">
-      <div class="tag2">Läufer-${step} · Position ${data.pos}</div>
-      <p>${data.text}</p>
+      <div class="info-row">
+        <div class="info-label">Von wo</div>
+        <p>${data.von}</p>
+      </div>
+      <div class="info-row">
+        <div class="info-label">Wohin</div>
+        <p>${data.wohin}</p>
+      </div>
+      <div class="info-row">
+        <div class="info-label">Regeln</div>
+        <ul class="regeln-list">${regelnList}</ul>
+      </div>
     </div>
     <div class="nav-row">
-      <button class="btn secondary" data-action="learn-prev" ${step===1?"disabled":""}>Zurück</button>
-      ${step===6
+      <button class="btn secondary" data-action="learn-prev" ${idx===0?"disabled":""}>Zurück</button>
+      ${idx===LEARN_ORDER.length-1
         ? `<button class="btn" data-action="start-quiz">Weiter zum Quiz →</button>`
         : `<button class="btn" data-action="learn-next">Weiter →</button>`}
     </div>
@@ -425,7 +415,7 @@ function renderQuiz(){
     <div class="quiz-sub">Wo musst du als ${role.label} stehen? Tippe auf das richtige Feld.</div>
     <div class="court-shell">${courtSVG({clickable: !answered, correctZone: answered ? data.pos : null, pickedZone: answered ? q.pickedZone : null})}</div>
     <div id="feedback" class="feedback ${answered ? 'show '+(q.lastCorrect?'ok':'bad') : ''}">
-      ${answered ? `<div class="title">${q.lastCorrect ? 'Richtig!' : 'Nicht ganz.'}</div><p style="margin:0;">${data.text}</p>` : ""}
+      ${answered ? `<div class="title">${q.lastCorrect ? 'Richtig!' : 'Nicht ganz.'}</div><p style="margin:0;">${data.von} ${data.wohin}</p>` : ""}
     </div>
     <div class="nav-row">
       <button class="btn secondary" data-action="quiz-quit">Beenden</button>
@@ -463,29 +453,23 @@ function attachEvents(){
     el.addEventListener("click", ()=>{
       state.role = el.dataset.role;
       state.screen = "learn";
-      state.learnStep = 1;
+      state.learnIndex = 0;
       render();
     });
   });
   const homeBtn = document.querySelector('[data-action="home"]');
   if(homeBtn) homeBtn.addEventListener("click", ()=>{ state.screen="home"; render(); });
 
-  document.querySelectorAll(".dial-node").forEach(el=>{
-    el.addEventListener("click", ()=>{
-      if(state.screen==="learn"){ state.learnStep = Number(el.dataset.rot); render(); }
-    });
-  });
-
   const prev = document.querySelector('[data-action="learn-prev"]');
-  if(prev) prev.addEventListener("click", ()=>{ state.learnStep = Math.max(1,state.learnStep-1); render(); });
+  if(prev) prev.addEventListener("click", ()=>{ state.learnIndex = Math.max(0,state.learnIndex-1); render(); });
   const next = document.querySelector('[data-action="learn-next"]');
-  if(next) next.addEventListener("click", ()=>{ state.learnStep = Math.min(6,state.learnStep+1); render(); });
+  if(next) next.addEventListener("click", ()=>{ state.learnIndex = Math.min(LEARN_ORDER.length-1,state.learnIndex+1); render(); });
 
   const startQuiz = document.querySelector('[data-action="start-quiz"]');
   if(startQuiz) startQuiz.addEventListener("click", ()=>{ beginQuiz(); });
 
   const learnAgain = document.querySelector('[data-action="learn-again"]');
-  if(learnAgain) learnAgain.addEventListener("click", ()=>{ state.screen="learn"; state.learnStep=1; render(); });
+  if(learnAgain) learnAgain.addEventListener("click", ()=>{ state.screen="learn"; state.learnIndex=0; render(); });
   const quizAgain = document.querySelector('[data-action="quiz-again"]');
   if(quizAgain) quizAgain.addEventListener("click", ()=>{ beginQuiz(); });
   const quizQuit = document.querySelector('[data-action="quiz-quit"]');
