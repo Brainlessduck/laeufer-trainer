@@ -260,7 +260,7 @@ svg.formation .net-label{ fill:#1a1a1a; font-weight:700; }
 const ROLES = {
   Z: { label:"Zuspieler", short:"Z",
     rot:{
-      1:{pos:1, zielPos:1, von:"Position 1, hinter dem Annahmeriegel.", wohin:"Bleibt zum Zuspiel bereit, kein langer Laufweg nötig.", regeln:["Drei Angreifer vorne nutzen (Außen 2 + Mitte 3)","Außen von Position 5 kann als Pipe-Angreifer im Hinterfeld eingesetzt werden"]},
+      1:{pos:1, zielPos:1, von:"Position 1, hinter dem Annahmeriegel.", wohin:"Bleibt zum Zuspiel bereit, kein langer Laufweg nötig.", regeln:["Der Zuspieler ist im Hinterfeld (Position 1) und darf daher nicht blocken","Drei Angreifer vorne nutzen (Außen 2 + Mitte 3)","Außen von Position 5 kann als Pipe-Angreifer im Hinterfeld eingesetzt werden"]},
       2:{pos:2, zielPos:2, von:"Position 2.", wohin:"Bleibt einfach stehen, kein Laufweg nötig.", regeln:["Zwei Angreifer vorne nutzen","Diagonalspieler als zusätzliche Hinterfeld-Option einplanen"]},
       3:{pos:3, zielPos:2, von:"Position 3, links neben dem Mittelblocker.", wohin:"Tauscht nach dem Aufschlag die Position mit dem Mittelblocker.", regeln:["Sofort nach dem eigenen Aufschlag die Position mit dem MB tauschen","MB muss danach wieder mittig am Netz stehen"]},
       4:{pos:4, zielPos:3, von:"Position 4, links von Mittelblocker und Außenangreifer.", wohin:"Muss zum Zuspielort laufen — lange Distanz.", regeln:["Schon beim gegnerischen Schlagmoment losspurten","Nicht zu spät starten, da der Weg lang ist"]},
@@ -473,10 +473,6 @@ function renderLearn(){
       <div class="info-row">
         <div class="info-label">Von wo</div>
         <p>${data.von}</p>
-      </div>
-      <div class="info-row">
-        <div class="info-label">Wohin</div>
-        <p>${data.wohin}</p>
       </div>
       <div class="info-row">
         <div class="info-label">Regeln</div>
