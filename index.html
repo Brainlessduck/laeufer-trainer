@@ -327,11 +327,23 @@ const ZONE_LAYOUT = {
 
 const SHORT_LABEL = { Z:"Z", MB1:"MB", MB2:"L", AA1:"AA", AA2:"AA", DIA:"D" };
 
+/* Exakte Aufstellungs-Koordinaten pro Läufer-Rotation, abgelesen aus den
+   Original-Grafiken (volleyball-insider.com). x/y in SVG-viewBox-Einheiten. */
+const FORMATION_LAYOUTS = {
+  1: { 4:{x:72, y:80}, 3:{x:187,y:80}, 5:{x:97, y:198}, 6:{x:169,y:218}, 2:{x:245,y:198}, 1:{x:288,y:224} },
+  6: { 3:{x:223,y:74}, 6:{x:205,y:103},2:{x:263,y:117}, 4:{x:79, y:198}, 5:{x:155,y:213}, 1:{x:245,y:198} },
+  5: { 4:{x:72, y:80}, 2:{x:270,y:80}, 5:{x:162,y:109},3:{x:101,y:204}, 6:{x:180,y:213}, 1:{x:245,y:204} },
+  4: { 4:{x:65, y:80}, 3:{x:108,y:109},2:{x:101,y:195},5:{x:166,y:204}, 6:{x:223,y:195}, 1:{x:281,y:204} },
+  3: { 3:{x:151,y:80}, 2:{x:198,y:109},4:{x:101,y:195},5:{x:162,y:213}, 1:{x:223,y:195}, 6:{x:205,y:224} },
+  2: { 4:{x:72, y:80}, 2:{x:216,y:80}, 3:{x:101,y:195},6:{x:169,y:204}, 1:{x:234,y:195}, 5:{x:162,y:224} }
+};
+
 /* ---------------- STATE ---------------- */
 let state = { screen:"home", role:null, learnIndex:0, quiz:{ order:[], idx:0, score:0, answered:false } };
 
 /* ---------------- HELPERS ---------------- */
 function formationSVG(step, focusKey){
+  const layout = FORMATION_LAYOUTS[step];
   const positions = {};
   for(const key in ROLES){
     const rd = ROLES[key].rot[step];
@@ -340,19 +352,18 @@ function formationSVG(step, focusKey){
   const focusData = ROLES[focusKey].rot[step];
 
   let arrow = "";
-  if(focusData.zielPos && focusData.zielPos !== focusData.pos){
-    const from = ZONE_LAYOUT[focusData.pos], to = ZONE_LAYOUT[focusData.zielPos];
-    const fx = from.x+from.w/2, fy = from.y+from.h/2-6;
-    const tx = to.x+to.w/2, ty = to.y+to.h/2-6;
+  if(focusData.zielPos && focusData.zielPos !== focusData.pos && layout[focusData.zielPos]){
+    const from = layout[focusData.pos], to = layout[focusData.zielPos];
+    const fx = from.x, fy = from.y;
+    const tx = to.x, ty = to.y;
     const mx = (fx+tx)/2, my = (fy+ty)/2 - 36;
     arrow = `<path class="move-arrow" d="M${fx},${fy} Q${mx},${my} ${tx},${ty}" marker-end="url(#arrowhead)"/>`;
   }
 
   let circles = "";
-  for(const num in ZONE_LAYOUT){
+  for(const num in layout){
     const n = Number(num);
-    const z = ZONE_LAYOUT[num];
-    const cx = z.x + z.w/2, cy = z.y + z.h/2;
+    const cx = layout[num].x, cy = layout[num].y;
     const occKey = positions[n];
     const isFocus = occKey === focusKey;
     const r = isFocus ? 34 : 30;
