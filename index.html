@@ -165,13 +165,15 @@ svg.formation .net-line{ stroke:#ffffff; stroke-width:5; }
 svg.formation .row-divider{ stroke:#ffffff; stroke-width:2; }
 svg.formation .net-label{ fill:#1a1a1a; font-weight:700; }
 .player{ fill:#4a4a4a; }
-.player.focus{ fill:var(--accent); stroke:#1a1a1a; stroke-width:3; }
-.player-label{ font-weight:800; font-size:19px; fill:#ffffff; pointer-events:none; }
+.player.focus{ fill:var(--accent); stroke:#1a1a1a; stroke-width:2.5; }
+.player-label{ font-weight:800; font-size:13px; fill:#ffffff; pointer-events:none; }
 .player-label.focus{ fill:#1a1a1a; }
 .player-num-bg{ fill:#ffffff; stroke:#1a1a1a; stroke-width:1; }
-.player-num{ font-weight:700; font-size:13px; fill:#1a1a1a; pointer-events:none; }
-.move-arrow{ fill:none; stroke:#1a1a1a; stroke-width:2.5; stroke-dasharray:5 5; }
-.arrow-head{ fill:#1a1a1a; }
+.player-num{ font-weight:700; font-size:10px; fill:#1a1a1a; pointer-events:none; }
+.move-arrow{ fill:none; stroke:#1a1a1a; stroke-width:1.6; stroke-dasharray:4 4; opacity:0.45; }
+.move-arrow.focus{ stroke-width:2.6; stroke-dasharray:5 5; opacity:1; }
+.arrow-head{ fill:#1a1a1a; opacity:0.45; }
+.arrow-head-focus{ fill:#1a1a1a; }
 
 .skip-row{ display:flex; justify-content:center; margin-top:14px; }
 .skip-btn{ font-size:0.85rem; color:var(--text-dim); text-decoration:underline; text-underline-offset:3px; }
@@ -349,15 +351,18 @@ function formationSVG(step, focusKey){
     const rd = ROLES[key].rot[step];
     positions[rd.pos] = key;
   }
-  const focusData = ROLES[focusKey].rot[step];
 
-  let arrow = "";
-  if(focusData.zielPos && focusData.zielPos !== focusData.pos && layout[focusData.zielPos]){
-    const from = layout[focusData.pos], to = layout[focusData.zielPos];
-    const fx = from.x, fy = from.y;
-    const tx = to.x, ty = to.y;
-    const mx = (fx+tx)/2, my = (fy+ty)/2 - 36;
-    arrow = `<path class="move-arrow" d="M${fx},${fy} Q${mx},${my} ${tx},${ty}" marker-end="url(#arrowhead)"/>`;
+  let arrows = "";
+  for(const key in ROLES){
+    const rd = ROLES[key].rot[step];
+    if(rd.zielPos && rd.zielPos !== rd.pos && layout[rd.pos] && layout[rd.zielPos]){
+      const from = layout[rd.pos], to = layout[rd.zielPos];
+      const fx = from.x, fy = from.y;
+      const tx = to.x, ty = to.y;
+      const mx = (fx+tx)/2, my = (fy+ty)/2 - 30;
+      const isFocus = key === focusKey;
+      arrows += `<path class="move-arrow ${isFocus?'focus':''}" d="M${fx},${fy} Q${mx},${my} ${tx},${ty}" marker-end="url(#arrowhead${isFocus?'-focus':''})"/>`;
+    }
   }
 
   let circles = "";
@@ -366,11 +371,11 @@ function formationSVG(step, focusKey){
     const cx = layout[num].x, cy = layout[num].y;
     const occKey = positions[n];
     const isFocus = occKey === focusKey;
-    const r = isFocus ? 34 : 30;
-    circles += `<circle class="player ${isFocus?'focus':''}" cx="${cx}" cy="${cy-6}" r="${r}"/>`;
+    const r = isFocus ? 26 : 22;
+    circles += `<circle class="player ${isFocus?'focus':''}" cx="${cx}" cy="${cy-5}" r="${r}"/>`;
     circles += `<text class="player-label ${isFocus?'focus':''}" x="${cx}" y="${cy+1}" text-anchor="middle">${occKey ? SHORT_LABEL[occKey] : ''}</text>`;
-    circles += `<circle class="player-num-bg" cx="${cx}" cy="${cy+r-8}" r="12"/>`;
-    circles += `<text class="player-num" x="${cx}" y="${cy+r-4}" text-anchor="middle">${n}</text>`;
+    circles += `<circle class="player-num-bg" cx="${cx}" cy="${cy+r-6}" r="9"/>`;
+    circles += `<text class="player-num" x="${cx}" y="${cy+r-2}" text-anchor="middle">${n}</text>`;
   }
 
   return `<svg class="court formation" viewBox="0 0 360 305" xmlns="http://www.w3.org/2000/svg">
@@ -378,12 +383,15 @@ function formationSVG(step, focusKey){
       <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
         <path d="M0,0 L8,4 L0,8 z" class="arrow-head"/>
       </marker>
+      <marker id="arrowhead-focus" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+        <path d="M0,0 L8,4 L0,8 z" class="arrow-head-focus"/>
+      </marker>
     </defs>
     <rect class="court-bg" x="0" y="16" width="360" height="289" rx="4"/>
     <line class="row-divider" x1="0" y1="160" x2="360" y2="160"/>
     <line class="net-line" x1="0" y1="16" x2="360" y2="16"/>
     <text class="net-label" x="180" y="10" text-anchor="middle">NETZ</text>
-    ${arrow}
+    ${arrows}
     ${circles}
   </svg>`;
 }
