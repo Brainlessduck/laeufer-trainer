@@ -354,7 +354,7 @@ const ARROWS_BY_STEP = {
   6: [ {from:4, to:{x:30,y:38}} ],
   5: [ {from:3, to:{x:72, y:48}} ],
   4: [ {from:4, to:{x:245,y:37}}, {from:3, to:{x:197,y:69}}, {from:2, to:{x:16, y:85}} ],
-  3: [ {from:4, to:{x:38,y:45}}, {from:6, to:{x:346,y:115}} ],
+  3: [ {from:4, to:{x:38,y:45}}, {from:6, to:{x:346,y:115}, via:{x:335,y:235}} ],
   2: [ {from:3, to:{x:72, y:45}}, {from:5, to:{x:245,y:42}} ]
 };
 
@@ -377,7 +377,8 @@ function formationSVG(step, focusKey){
     if(!from) continue;
     const fx = from.x, fy = from.y;
     const tx = a.to.x, ty = a.to.y;
-    const mx = (fx+tx)/2, my = Math.min(fy,ty) - 20;
+    const mx = a.via ? a.via.x : (fx+tx)/2;
+    const my = a.via ? a.via.y : Math.min(fy,ty) - 20;
     const occKey = positions[a.from];
     const isFocus = occKey === focusKey;
     arrows += `<path class="move-arrow ${isFocus?'focus':''}" d="M${fx},${fy} Q${mx},${my} ${tx},${ty}" marker-end="url(#arrowhead${isFocus?'-focus':''})"/>`;
