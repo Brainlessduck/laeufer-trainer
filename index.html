@@ -328,6 +328,13 @@ const ZONE_LAYOUT = {
 };
 
 const SHORT_LABEL = { Z:"Z", MB1:"MB", MB2:"L", AA1:"AA", AA2:"AA", DIA:"D" };
+const FRONT_ZONES = [2,3,4];
+function shortLabelFor(key, posNum){
+  if(key === "MB1" || key === "MB2"){
+    return FRONT_ZONES.includes(posNum) ? "MB" : "L";
+  }
+  return SHORT_LABEL[key];
+}
 
 /* Exakte Aufstellungs-Koordinaten pro Läufer-Rotation, abgelesen aus den
    Original-Grafiken (volleyball-insider.com). x/y in SVG-viewBox-Einheiten. */
@@ -336,7 +343,7 @@ const FORMATION_LAYOUTS = {
   6: { 3:{x:272,y:44}, 6:{x:230,y:82}, 2:{x:298,y:101}, 4:{x:83, y:184}, 5:{x:182,y:210}, 1:{x:269,y:184} },
   5: { 4:{x:72, y:80}, 2:{x:270,y:80}, 5:{x:162,y:109},3:{x:101,y:204}, 6:{x:180,y:213}, 1:{x:245,y:204} },
   4: { 4:{x:37, y:43}, 3:{x:62, y:92}, 2:{x:87, y:207},5:{x:179,y:223}, 6:{x:265,y:207}, 1:{x:319,y:238} },
-  3: { 3:{x:151,y:80}, 2:{x:198,y:109},4:{x:101,y:195},5:{x:162,y:213}, 1:{x:223,y:195}, 6:{x:205,y:224} },
+  3: { 3:{x:196,y:42}, 2:{x:241,y:91},4:{x:84, y:175},5:{x:184,y:191}, 1:{x:274,y:175}, 6:{x:235,y:209} },
   2: { 4:{x:72, y:80}, 2:{x:216,y:80}, 3:{x:101,y:195},6:{x:169,y:204}, 1:{x:234,y:195}, 5:{x:162,y:224} }
 };
 
@@ -347,7 +354,7 @@ const ARROWS_BY_STEP = {
   6: [ {from:4, to:{x:30,y:38}} ],
   5: [ {from:3, to:{x:72, y:48}} ],
   4: [ {from:4, to:{x:245,y:37}}, {from:3, to:{x:197,y:69}}, {from:2, to:{x:16, y:85}} ],
-  3: [ {from:4, to:{x:72, y:45}}, {from:6, to:{x:230,y:42}} ],
+  3: [ {from:4, to:{x:30,y:49}}, {from:6, to:{x:354,y:123}} ],
   2: [ {from:3, to:{x:72, y:45}}, {from:5, to:{x:245,y:42}} ]
 };
 
@@ -384,7 +391,7 @@ function formationSVG(step, focusKey){
     const isFocus = occKey === focusKey;
     const r = isFocus ? 21 : 18;
     circles += `<circle class="player ${isFocus?'focus':''}" cx="${cx}" cy="${cy-5}" r="${r}"/>`;
-    circles += `<text class="player-label ${isFocus?'focus':''}" x="${cx}" y="${cy+1}" text-anchor="middle">${occKey ? SHORT_LABEL[occKey] : ''}</text>`;
+    circles += `<text class="player-label ${isFocus?'focus':''}" x="${cx}" y="${cy+1}" text-anchor="middle">${occKey ? shortLabelFor(occKey, n) : ''}</text>`;
     circles += `<circle class="player-num-bg" cx="${cx}" cy="${cy+r-6}" r="8"/>`;
     circles += `<text class="player-num" x="${cx}" y="${cy+r-2}" text-anchor="middle">${n}</text>`;
   }
