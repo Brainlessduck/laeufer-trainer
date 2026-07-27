@@ -157,6 +157,7 @@ html[data-theme="light"] .zone{ fill: rgba(0,0,0,0.03); }
 .zone-label{ font-weight:800; font-size:22px; fill:var(--text-dim); pointer-events:none; }
 .zone.target .zone-label, .zone.correct .zone-label, .zone.wrong .zone-label{ fill:#1a1a1a; }
 .net-line{ stroke:var(--card-border); stroke-width:5; }
+.row-divider{ stroke:#ffffff; stroke-width:2; opacity:.85; }
 .net-label{ font-size:11px; fill:var(--text-dim); letter-spacing:.15em; font-weight:600; }
 
 /* Formation (echte Aufstellung mit Rollen) */
@@ -165,11 +166,11 @@ svg.formation .net-line{ stroke:#ffffff; stroke-width:5; }
 svg.formation .row-divider{ stroke:#ffffff; stroke-width:2; }
 svg.formation .net-label{ fill:#1a1a1a; font-weight:700; }
 .player{ fill:#4a4a4a; }
-.player.focus{ fill:#0d0d0d; stroke:var(--accent); stroke-width:2.5; }
-.player-label{ font-weight:800; font-size:11px; fill:#ffffff; pointer-events:none; }
+.player.focus{ fill:#0d0d0d; stroke:var(--accent); stroke-width:3; }
+.player-label{ font-weight:800; font-size:14px; fill:#ffffff; pointer-events:none; }
 .player-label.focus{ fill:#ffffff; }
 .player-num-bg{ fill:#ffffff; stroke:#1a1a1a; stroke-width:1; }
-.player-num{ font-weight:700; font-size:9px; fill:#1a1a1a; pointer-events:none; }
+.player-num{ font-weight:700; font-size:11px; fill:#1a1a1a; pointer-events:none; }
 .move-arrow{ fill:none; stroke:#1a1a1a; stroke-width:2.6; stroke-dasharray:5 5; opacity:1; }
 .move-arrow.focus{ stroke-width:2.6; stroke-dasharray:5 5; opacity:1; }
 .arrow-head{ fill:#1a1a1a; opacity:1; }
@@ -350,8 +351,8 @@ const ROLES = {
 
 const LEARN_ORDER = [1,6,5,4,3,2];
 
-/* Klick-Toleranz im Quiz (viewBox-Einheiten). Spielerkreis hat r=21. */
-const TOLERANCE = 42;
+/* Klick-Toleranz im Quiz (viewBox-Einheiten). Spielerkreis hat r=27. */
+const TOLERANCE = 50;
 
 const SHORT_LABEL = { Z:"Z", MB1:"MB", MB2:"L", AA1:"AA", AA2:"AA", DIA:"D" };
 const FRONT_ZONES = [2,3,4];
@@ -416,11 +417,11 @@ function formationSVG(step, focusKey){
     const cx = layout[num].x, cy = layout[num].y;
     const occKey = positions[n];
     const isFocus = occKey === focusKey;
-    const r = isFocus ? 21 : 18;
+    const r = isFocus ? 27 : 23;
     circles += `<circle class="player ${isFocus?'focus':''}" cx="${cx}" cy="${cy-5}" r="${r}"/>`;
-    circles += `<text class="player-label ${isFocus?'focus':''}" x="${cx}" y="${cy+1}" text-anchor="middle">${occKey ? shortLabelFor(occKey, n) : ''}</text>`;
-    circles += `<circle class="player-num-bg" cx="${cx}" cy="${cy+r-6}" r="8"/>`;
-    circles += `<text class="player-num" x="${cx}" y="${cy+r-2}" text-anchor="middle">${n}</text>`;
+    circles += `<text class="player-label ${isFocus?'focus':''}" x="${cx}" y="${cy+2}" text-anchor="middle">${occKey ? shortLabelFor(occKey, n) : ''}</text>`;
+    circles += `<circle class="player-num-bg" cx="${cx}" cy="${cy+r-7}" r="10"/>`;
+    circles += `<text class="player-num" x="${cx}" y="${cy+r-3}" text-anchor="middle">${n}</text>`;
   }
 
   return `<svg class="court formation" viewBox="0 0 360 305" xmlns="http://www.w3.org/2000/svg">
@@ -454,18 +455,18 @@ function placementSVG({step, focusKey, pick=null, answered=false, correct=null})
     const n = Number(num);
     if(positions[n] === focusKey) continue;
     const p = layout[num];
-    ghosts += `<circle class="player" cx="${p.x}" cy="${p.y-5}" r="18"/>`;
-    ghosts += `<text class="player-label" x="${p.x}" y="${p.y+1}" text-anchor="middle">${shortLabelFor(positions[n], n)}</text>`;
-    ghosts += `<circle class="player-num-bg" cx="${p.x}" cy="${p.y+12}" r="8"/>`;
-    ghosts += `<text class="player-num" x="${p.x}" y="${p.y+16}" text-anchor="middle">${n}</text>`;
+    ghosts += `<circle class="player" cx="${p.x}" cy="${p.y-5}" r="23"/>`;
+    ghosts += `<text class="player-label" x="${p.x}" y="${p.y+2}" text-anchor="middle">${shortLabelFor(positions[n], n)}</text>`;
+    ghosts += `<circle class="player-num-bg" cx="${p.x}" cy="${p.y+16}" r="10"/>`;
+    ghosts += `<text class="player-num" x="${p.x}" y="${p.y+20}" text-anchor="middle">${n}</text>`;
   }
 
   let overlay = "";
   if(answered && correct){
     overlay += `<circle class="target-ring" cx="${correct.x}" cy="${correct.y-5}" r="${TOLERANCE}"/>`;
-    overlay += `<circle class="player focus" cx="${correct.x}" cy="${correct.y-5}" r="21"/>`;
+    overlay += `<circle class="player focus" cx="${correct.x}" cy="${correct.y-5}" r="27"/>`;
     const focusPos = ROLES[focusKey].rot[step].pos;
-    overlay += `<text class="player-label focus" x="${correct.x}" y="${correct.y+1}" text-anchor="middle">${shortLabelFor(focusKey, focusPos)}</text>`;
+    overlay += `<text class="player-label focus" x="${correct.x}" y="${correct.y+2}" text-anchor="middle">${shortLabelFor(focusKey, focusPos)}</text>`;
   }
   if(pick){
     const ok = answered && correct && dist(pick, {x:correct.x, y:correct.y-5}) <= TOLERANCE;
