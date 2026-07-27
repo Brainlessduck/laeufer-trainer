@@ -447,15 +447,16 @@ function placementSVG({step, focusKey, pick=null, answered=false, correct=null})
     positions[ROLES[key].rot[step].pos] = key;
   }
 
+  // Mitspieler immer sichtbar (nur der eigene Spieler fehlt - den muss man setzen)
   let ghosts = "";
-  if(answered){
-    for(const num in layout){
-      const n = Number(num);
-      if(positions[n] === focusKey) continue;
-      const p = layout[num];
-      ghosts += `<circle class="ghost-player" cx="${p.x}" cy="${p.y-5}" r="17"/>`;
-      ghosts += `<text class="ghost-label" x="${p.x}" y="${p.y}" text-anchor="middle">${shortLabelFor(positions[n], n)}</text>`;
-    }
+  for(const num in layout){
+    const n = Number(num);
+    if(positions[n] === focusKey) continue;
+    const p = layout[num];
+    ghosts += `<circle class="player" cx="${p.x}" cy="${p.y-5}" r="18"/>`;
+    ghosts += `<text class="player-label" x="${p.x}" y="${p.y+1}" text-anchor="middle">${shortLabelFor(positions[n], n)}</text>`;
+    ghosts += `<circle class="player-num-bg" cx="${p.x}" cy="${p.y+12}" r="8"/>`;
+    ghosts += `<text class="player-num" x="${p.x}" y="${p.y+16}" text-anchor="middle">${n}</text>`;
   }
 
   let overlay = "";
@@ -580,7 +581,7 @@ function renderQuiz(){
       <div class="quiz-prompt">Läufer-${item.step}</div>
       <div class="quiz-sub">Klicke auf das Feld: Wo genau stehst du als ${role.label} in der Annahme?</div>
       <div class="court-shell">${placementSVG({step:item.step, focusKey:state.role, pick:item.pick, answered, correct})}</div>
-      ${answered ? "" : `<div class="hint-text">Tippe die exakte Stelle an — Zone allein reicht nicht.</div>`}
+      ${answered ? "" : `<div class="hint-text">Deine Mitspieler stehen schon — tippe an, wo du selbst hingehörst.</div>`}
       <div id="feedback" class="feedback ${answered ? 'show '+(item.correct?'ok':'bad') : ''}">
         ${answered ? `<div class="title">${item.correct ? 'Richtig!' : 'Nicht ganz.'}</div><p style="margin:0;">Du stehst hier auf Position <b>${data.pos}</b>. ${data.von}</p>` : ""}
       </div>` + nav;
