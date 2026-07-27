@@ -362,7 +362,10 @@ function nearestZone(step, x, y){
   let best = null, bestDist = Infinity;
   for(const num in layout){
     const p = layout[num];
-    const d = (p.x-x)**2 + (p.y-y)**2;
+    // -5 gleicht den visuellen Versatz aus, mit dem die Kreise gezeichnet
+    // werden (cy="p.y-5"), damit Klick-Koordinaten exakt zur sichtbaren
+    // Position passen.
+    const d = (p.x-x)**2 + (p.y-5-y)**2;
     if(d < bestDist){ bestDist = d; best = Number(num); }
   }
   return best;
