@@ -123,7 +123,8 @@ p.sub{ color:var(--text-dim); line-height:1.75; font-size:1.02rem; max-width:56c
 
 /* Role cards */
 .roles{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
-@media (max-width:520px){ .roles{ grid-template-columns:1fr; } }
+.roles .role-card:last-child:nth-child(odd){ grid-column: span 2; }
+@media (max-width:520px){ .roles{ grid-template-columns:1fr; } .roles .role-card:last-child:nth-child(odd){ grid-column:span 1; } }
 .role-card{
   background: var(--card-bg); border:1px solid var(--card-border); border-radius:20px;
   padding:20px; text-align:left; cursor:pointer; color:var(--text);
@@ -301,27 +302,27 @@ const ROLES = {
       6:{pos:6, zielPos:6, von:"Der Zuspieler (6) steht zwischen hinterem Mittelblocker/Libero (5) und Außenangreifer (1), aber hinter Diagonalangreifer (3). Er kann von dieser Position direkt zuspielen.", wohin:"Bleibt an Position und spielt direkt zu.", regeln:["Direktes Zuspiel von hier möglich, kein Laufweg nötig"]}
     }
   },
-  MB1: { label:"Mittelblocker (vorne)", short:"MB1",
+  MB: { label:"Mittelblocker", short:"MB",
     rot:{
-      1:{pos:3, zielPos:3, von:"Position 3, vorne mittig.", wohin:"Bleibt am Netz für den Angriff über die 3.", regeln:["Nur kurze Bälle in der Annahme übernehmen","Sofort angriffsbereit bleiben"]},
-      2:{pos:4, zielPos:3, von:"Position 4, links vom Außenangreifer.", wohin:"Läuft nach der Annahme sofort zur 3.", regeln:["Kurze Bälle selbst annehmen","Danach zügig zur 3 laufen"]},
-      3:{pos:5, zielPos:5, von:"Position 5, im Hinterfeld.", wohin:"Bleibt zur Abwehr auf 5 oder wechselt auf 6.", regeln:["Nach Absprache mit dem Team ggf. auf 6 wechseln"]},
-      4:{pos:6, zielPos:5, von:"Position 6, hinten mittig.", wohin:"Wechselt nach der Annahme in die Abwehr, meist auf 5.", regeln:["Nach der Annahme zügig Richtung 5 orientieren"]},
-      5:{pos:1, zielPos:6, von:"Position 1.", wohin:"Wechselt nach der Annahme in die Abwehr.", regeln:["Hier übernimmt oft der Libero die Position"]},
-      6:{pos:2, zielPos:3, von:"Position 2, rechts vom Diagonalangreifer.", wohin:"Läuft direkt mittig zur 3 für den Schnellangriff.", regeln:["Nach der Annahme sofort zur 3 für den Schnellangriff"]}
-    }
-  },
-  MB2: { label:"Mittelblocker (hinten) / Libero", short:"MB2",
-    rot:{
-      1:{pos:6, zielPos:6, von:"Der hintere Mittelblocker oder Libero nimmt auf der 6 an und bleibt dann dort oder wehrt auf der 5 ab.", wohin:"Bleibt zur Abwehr auf 6, optional auf 5.", regeln:["Optional auf 5 abwehren, je nach Zuspiel"]},
-      2:{pos:1, zielPos:5, von:"Der hintere Mittelblocker oder Libero nimmt auf der 1 an und wechselt dann auf die 5 oder 6 zur Abwehr.", wohin:"Wechselt nach der Annahme in die Abwehr auf 5 oder 6.", regeln:["Klassischer Einsatzort für den Libero"]},
+      1:{pos:3, zielPos:3, von:"Der Mittelblocker steht vorne mittig auf Position 3, direkt am Netz.", wohin:"Bleibt am Netz für den Angriff über die 3.", regeln:["Nur kurze Bälle in der Annahme übernehmen","Sofort angriffsbereit bleiben"]},
+      2:{pos:4, zielPos:3, von:"Der Mittelblocker steht vorne links auf Position 4, links vom Außenangreifer.", wohin:"Läuft nach der Annahme sofort zur 3.", regeln:["Kurze Bälle selbst annehmen","Danach zügig zur 3 laufen"]},
       3:{pos:2, zielPos:3, von:"Der Mittelblocker tauscht mit dem Zuspieler die Position und kann sofort angreifen. Auch ein Angriff über Kopf ist möglich.", wohin:"Tauscht die Position mit dem Zuspieler.", regeln:["Kann danach sofort angreifen","Auch ein Angriff über Kopf ist hier möglich"]},
       4:{pos:3, zielPos:3, von:"Der Mittelblocker steht zwischen Zuspieler (4) und Außenangreifer (2) und geht nach der Annahme sofort zur 3 zum Angreifen.", wohin:"Bleibt direkt angriffsbereit.", regeln:["Sofort angriffsbereit sein"]},
       5:{pos:4, zielPos:3, von:"Der Mittelblocker steht auf der 4, links vom Außenangreifer (3) und geht nach der Annahme sofort zur 3 für den Angriff.", wohin:"Läuft nach der Annahme sofort zur 3.", regeln:["Zügig zur 3 zum Angreifen wechseln"]},
-      6:{pos:5, zielPos:5, von:"Der hintere Mittelblocker oder Libero (5) nimmt zunächst auf der 6 an und bleibt dann dort oder wehrt optional auf der 5 ab.", wohin:"Bleibt zur Abwehr auf 5, optional auf 6.", regeln:["Optional auf 6 rücken, je nach Spielsituation"]}
+      6:{pos:2, zielPos:3, von:"Der Mittelblocker steht vorne rechts auf Position 2, rechts vom Diagonalangreifer.", wohin:"Läuft direkt mittig zur 3 für den Schnellangriff.", regeln:["Nach der Annahme sofort zur 3 für den Schnellangriff"]}
     }
   },
-  AA1: { label:"Außenangreifer (vorne)", short:"AA1",
+  LIBERO: { label:"Libero", short:"L",
+    rot:{
+      1:{pos:6, zielPos:5, von:"Der Libero steht hinten mittig auf Position 6 und übernimmt hier die Annahme für den ausgewechselten Mittelblocker.", wohin:"Bleibt zur Abwehr auf 6, optional auf 5.", regeln:["Optional auf 5 abwehren, je nach Zuspiel"]},
+      2:{pos:1, zielPos:5, von:"Der Libero steht hinten rechts auf Position 1 und übernimmt hier die Annahme.", wohin:"Wechselt nach der Annahme in die Abwehr auf 5 oder 6.", regeln:["Klassischer Einsatzort für den Libero"]},
+      3:{pos:5, zielPos:5, von:"Der Libero steht im Hinterfeld mittig auf Position 5.", wohin:"Bleibt zur Abwehr auf 5 oder wechselt auf 6.", regeln:["Nach Absprache mit dem Team ggf. auf 6 wechseln"]},
+      4:{pos:6, zielPos:5, von:"Der Libero steht hinten mittig auf Position 6.", wohin:"Wechselt nach der Annahme in die Abwehr, meist auf 5.", regeln:["Nach der Annahme zügig Richtung 5 orientieren"]},
+      5:{pos:1, zielPos:6, von:"Der Libero steht hinten rechts auf Position 1 und übernimmt hier die Position des Mittelblockers.", wohin:"Wechselt nach der Annahme in die Abwehr.", regeln:["Der Mittelblocker wird hier durch den Libero ersetzt"]},
+      6:{pos:5, zielPos:5, von:"Der Libero nimmt zunächst nahe Position 6 mit an und steht dann auf Position 5 zur Abwehr.", wohin:"Bleibt zur Abwehr auf 5, optional auf 6.", regeln:["Optional auf 6 rücken, je nach Spielsituation"]}
+    }
+  },
+  AA: { label:"Außenangreifer", short:"AA",
     rot:{
       1:{pos:2, zielPos:2, von:"Der Außenangreifer (2) nimmt zunächst von der Position 1 an. Er greift dann von der 2 an, kann aber nach dem ersten Angriff wahlweise mit dem Diagonalangreifer (4) wechseln.", wohin:"Wechselt zur 2 für den Angriff.", regeln:["Nach dem ersten Angriff optional die Seite mit dem Diagonalspieler tauschen"]},
       2:{pos:3, zielPos:4, von:"Der Außenangreifer (3) steht rechts von Mittelblocker (4), nimmt auf der Position 5 an und wechselt dann auf die 4 zum Angreifen.", wohin:"Nimmt auf 5 an, wechselt danach zur 4.", regeln:["Nach der Annahme zügig zur 4 wechseln"]},
@@ -331,7 +332,7 @@ const ROLES = {
       6:{pos:1, zielPos:5, von:"Der Außen-Annahme-Spieler nimmt auf der 1 an und wechselt dann mit dem Libero zur 5 oder geht auf die 6 zur Abwehr.", wohin:"Nimmt auf 1 an, wechselt danach mit dem Libero auf 5 oder bleibt zur Abwehr auf 6.", regeln:["Wechsel mit dem Libero beachten"]}
     }
   },
-  AA2: { label:"Außenangreifer (hinten)", short:"AA2",
+  AA_B: { label:"Außenangreifer (2. Spieler)", short:"AA",
     rot:{
       1:{pos:5, zielPos:6, von:"Der Außen-Annahme-Spieler nimmt auf der 5 an und wechselt auf die 6 oder bleibt dort.", wohin:"Nimmt auf 5 an, wechselt danach auf 6 oder bleibt zur Abwehr.", regeln:["Nach der Annahme je nach Situation entscheiden"]},
       2:{pos:6, zielPos:5, von:"Der Außen-Annahme-Spieler nimmt auf der 6 an und wechselt auf die 5 oder bleibt dort für die Abwehr.", wohin:"Nimmt auf 6 an, rückt danach auf 5 vor oder bleibt zur Abwehr.", regeln:["Flexibel je nach Spielsituation reagieren"]},
@@ -393,14 +394,15 @@ function targetGuideRadius(step, zoneNum){
   return minDist / 2;
 }
 
-const SHORT_LABEL = { Z:"Z", MB1:"MB", MB2:"L", AA1:"AA", AA2:"AA", DIA:"D" };
-const FRONT_ZONES = [2,3,4];
-function shortLabelFor(key, posNum){
-  if(key === "MB1" || key === "MB2"){
-    return FRONT_ZONES.includes(posNum) ? "MB" : "L";
-  }
+const SHORT_LABEL = { Z:"Z", MB:"MB", LIBERO:"L", AA:"AA", AA_B:"AA", DIA:"D" };
+function shortLabelFor(key){
   return SHORT_LABEL[key];
 }
+
+/* Reihenfolge & Auswahl der Rollen-Karten auf der Startseite.
+   AA_B bleibt intern (für die zweite Außenangreifer-Position im Feld),
+   ist aber keine eigene wählbare Rolle mehr. */
+const ROLE_ORDER = ["Z","AA","MB","LIBERO","DIA"];
 
 /* Exakte Aufstellungs-Koordinaten pro Läufer-Rotation, abgelesen aus den
    Original-Grafiken (volleyball-insider.com). x/y in SVG-viewBox-Einheiten. */
@@ -536,13 +538,14 @@ function render(){
   else if(state.screen==="learn") app.innerHTML = renderLearn();
   else if(state.screen==="quiz") app.innerHTML = renderQuiz();
   else if(state.screen==="result") app.innerHTML = renderResult();
+  else if(state.screen==="ref") app.innerHTML = renderRef();
   attachEvents();
 }
 
 /* ---------------- SCREENS ---------------- */
 function renderHome(){
   let cards = "";
-  for(const key in ROLES){
+  for(const key of ROLE_ORDER){
     const r = ROLES[key];
     cards += `<div class="role-card" data-role="${key}">
       <div class="tag">${r.short}</div>
@@ -554,7 +557,63 @@ function renderHome(){
     <h1 class="main-title">Läufer-Trainer</h1>
     <p class="sub">Wähle deine Position aus. Gleich kannst du ein Quiz machen, in dem du die Rotationen lernst.</p>
     <div class="roles">${cards}</div>
+    <div class="skip-row" style="margin-top:22px;">
+      <button class="btn-ghost skip-btn" data-action="open-ref">📋 Schiedsrichter-Regelwerk</button>
+    </div>
     <div class="footer-note">Basierend auf dem 5:1-System · Grundlagen: <a href="https://volleyball-insider.com/training/taktik/laefer-system-5-1-volleyball/" target="_blank" rel="noopener">volleyball-insider.com</a></div>
+  `;
+}
+
+/* ---------------- SCHIEDSRICHTER-REGELWERK ---------------- */
+const REF_RULES = [
+  { title:"Rotationsfehler", items:[
+    "Beim eigenen Aufschlag müssen alle Spieler in der richtigen Reihenfolge stehen (seitlich und vorne/hinten zueinander) — nur zum Zeitpunkt des Aufschlags relevant.",
+    "Nach dem Pfiff dürfen sich Spieler frei bewegen, die Position beim Aufschlag zählt.",
+    "Folge: Punkt und Aufschlagrecht für das gegnerische Team."
+  ]},
+  { title:"Aufschlagfehler", items:[
+    "8 Sekunden Zeit zwischen Pfiff und Aufschlag.",
+    "Fußfehler: Übertreten der Grundlinie beim Absprung/Kontakt.",
+    "Der Ball darf beim Aufschlag nicht im eigenen Feld oder im Netz enden, muss die Antenne innerhalb passieren."
+  ]},
+  { title:"Angriffs- und Blockfehler", items:[
+    "Hinterfeldspieler dürfen nur vor der 3-Meter-Linie abspringen, wenn der Ball beim Schlag nicht vollständig über der Netzkante ist.",
+    "Rückwärtsspieler (Position 1, 5, 6) dürfen nicht blocken.",
+    "Der Libero darf nie einen Ball angreifen, der sich komplett über der Netzoberkante befindet — egal von wo."
+  ]},
+  { title:"Netz- und Antennenregeln", items:[
+    "Berührt ein Spieler während einer Spielaktion das Netz, ist das ein Fehler.",
+    "Der Ball darf die Antenne nicht berühren und muss innerhalb der Antennen über das Netz.",
+    "Ein Übergreifen der Hand über das Netz beim Block ist erlaubt, wenn der Ball vom Gegner bereits geschlagen wurde."
+  ]},
+  { title:"Liberoregeln", items:[
+    "Trikot in anderer Farbe als der Rest des Teams.",
+    "Darf nur für Hinterfeldspieler eingewechselt werden, unbegrenzt oft, ohne dass es als reguläre Auswechslung zählt.",
+    "Darf nicht aufschlagen, blocken oder einen Ball komplett über Netzhöhe angreifen.",
+    "Kann nicht als Kapitän oder Mannschaftsführer auf dem Feld fungieren."
+  ]},
+  { title:"Auszeiten & Wechsel", items:[
+    "In der Regel 2 reguläre Auszeiten (je 30 Sekunden) pro Satz.",
+    "Bis zu 6 reguläre Spielerwechsel pro Satz (Libero-Wechsel zählen nicht dazu).",
+    "Technische Auszeiten (bei Punktzahl 8 und 16) gelten je nach Wettbewerb, nicht überall Standard."
+  ]}
+];
+
+function renderRef(){
+  const sections = REF_RULES.map(sec => `
+    <div class="info-card" style="margin-bottom:14px;">
+      <div class="info-label">${sec.title}</div>
+      <ul class="regeln-list">${sec.items.map(i=>`<li>${i}</li>`).join("")}</ul>
+    </div>
+  `).join("");
+  return `
+    <div class="top-nav">
+      <button class="btn-ghost" data-action="home">← Positionen</button>
+      <div class="eyebrow">Schiedsrichter</div>
+    </div>
+    <h1 class="step-title">Regelwerk</h1>
+    <p class="sub">Kurzüberblick über die wichtigsten Volleyballregeln — als Nachschlagewerk, unabhängig von der aktuellen Rotation.</p>
+    ${sections}
   `;
 }
 
@@ -700,6 +759,9 @@ function attachEvents(){
   });
   const homeBtn = document.querySelector('[data-action="home"]');
   if(homeBtn) homeBtn.addEventListener("click", ()=>{ state.screen="home"; render(); });
+
+  const refBtn = document.querySelector('[data-action="open-ref"]');
+  if(refBtn) refBtn.addEventListener("click", ()=>{ state.screen="ref"; render(); });
 
   const prev = document.querySelector('[data-action="learn-prev"]');
   if(prev) prev.addEventListener("click", ()=>{ state.learnIndex = Math.max(0,state.learnIndex-1); render(); });
