@@ -219,6 +219,33 @@ svg.formation .net-label{ fill:#1a1a1a; font-weight:700; }
 
 .result-card{ text-align:center; }
 .result-card .big{ font-size:3.2rem; font-weight:900; color:var(--accent); }
+.result-breakdown{ display:flex; justify-content:center; gap:26px; margin-top:14px; flex-wrap:wrap; }
+.result-breakdown div{ font-size:13px; color:var(--text-dim); font-weight:600; }
+.result-breakdown b{ display:block; font-size:1.4rem; color:var(--text); font-weight:800; margin-top:2px; }
+
+/* Klick-Feld */
+.court.placement{ cursor:crosshair; }
+.court.placement.locked{ cursor:default; }
+.pick-marker{ fill:none; stroke:var(--bad); stroke-width:3; }
+.pick-marker.ok{ stroke:var(--ok); }
+.target-ring{ fill:none; stroke:var(--ok); stroke-width:2.5; stroke-dasharray:5 4; opacity:.9; }
+.ghost-player{ fill:#5a5a5f; opacity:.55; }
+.ghost-label{ fill:#fff; font-size:13px; font-weight:700; opacity:.75; }
+.hint-text{ text-align:center; font-size:12px; color:var(--text-dim); margin-top:6px; }
+
+/* Multiple Choice */
+.mc-list{ display:flex; flex-direction:column; gap:10px; margin-top:14px; }
+.mc-opt{
+  font-family:inherit; text-align:left; font-size:14.5px; line-height:1.5;
+  background:var(--card-bg); border:1px solid var(--card-border); color:var(--text);
+  border-radius:14px; padding:14px 16px; cursor:pointer;
+  transition: border-color .15s ease, transform .15s ease, background .15s ease;
+}
+.mc-opt:hover:not(:disabled){ border-color:var(--accent); transform:translateY(-1px); }
+.mc-opt:disabled{ cursor:default; }
+.mc-opt.correct{ border-color:var(--ok); background:color-mix(in srgb, var(--ok) 10%, var(--card-bg)); }
+.mc-opt.wrong{ border-color:var(--bad); background:color-mix(in srgb, var(--bad) 10%, var(--card-bg)); }
+.mc-opt.dim{ opacity:.5; }
 
 .footer-note{ margin-top:44px; font-size:12px; color:var(--text-dim); text-align:center; line-height:1.6; }
 .footer-note a{ color:var(--link-blue); text-decoration:underline; }
@@ -322,10 +349,8 @@ const ROLES = {
 
 const LEARN_ORDER = [1,6,5,4,3,2];
 
-const ZONE_LAYOUT = {
-  4:{x:0,  y:20, w:120,h:140}, 3:{x:120,y:20, w:120,h:140}, 2:{x:240,y:20, w:120,h:140},
-  5:{x:0,  y:160,w:120,h:140}, 6:{x:120,y:160,w:120,h:140}, 1:{x:240,y:160,w:120,h:140}
-};
+/* Klick-Toleranz im Quiz (viewBox-Einheiten). Spielerkreis hat r=21. */
+const TOLERANCE = 42;
 
 const SHORT_LABEL = { Z:"Z", MB1:"MB", MB2:"L", AA1:"AA", AA2:"AA", DIA:"D" };
 const FRONT_ZONES = [2,3,4];
@@ -359,7 +384,7 @@ const ARROWS_BY_STEP = {
 };
 
 /* ---------------- STATE ---------------- */
-let state = { screen:"home", role:null, learnIndex:0, quiz:{ order:[], idx:0, score:0, answered:false } };
+let state = { screen:"home", role:null, learnIndex:0, quiz:{ pool:[], idx:0, score:0, retryRound:false } };
 
 /* ---------------- HELPERS ---------------- */
 function formationSVG(step, focusKey){
@@ -415,24 +440,50 @@ function formationSVG(step, focusKey){
   </svg>`;
 }
 
-function courtSVG({target=null, clickable=false, correctZone=null, pickedZone=null}={}){
-  let zones = "";
-  for(const num in ZONE_LAYOUT){
-    const n = Number(num);
-    const z = ZONE_LAYOUT[num];
-    let cls = "zone";
-    if(clickable) cls += " clickable";
-    if(target && n===target) cls += " target";
-    if(correctZone && n===correctZone) cls += " correct";
-    if(pickedZone && n===pickedZone && pickedZone!==correctZone) cls += " wrong";
-    zones += `<rect class="${cls}" data-zone="${num}" x="${z.x}" y="${z.y}" width="${z.w}" height="${z.h}" rx="8"/>`;
-    zones += `<text class="zone-label" x="${z.x+z.w/2}" y="${z.y+z.h/2+8}" text-anchor="middle">${num}</text>`;
+function placementSVG({step, focusKey, pick=null, answered=false, correct=null}){
+  const layout = FORMATION_LAYOUTS[step];
+  const positions = {};
+  for(const key in ROLES){
+    positions[ROLES[key].rot[step].pos] = key;
   }
-  return `<svg class="court" viewBox="0 0 360 305" xmlns="http://www.w3.org/2000/svg">
+
+  let ghosts = "";
+  if(answered){
+    for(const num in layout){
+      const n = Number(num);
+      if(positions[n] === focusKey) continue;
+      const p = layout[num];
+      ghosts += `<circle class="ghost-player" cx="${p.x}" cy="${p.y-5}" r="17"/>`;
+      ghosts += `<text class="ghost-label" x="${p.x}" y="${p.y}" text-anchor="middle">${shortLabelFor(positions[n], n)}</text>`;
+    }
+  }
+
+  let overlay = "";
+  if(answered && correct){
+    overlay += `<circle class="target-ring" cx="${correct.x}" cy="${correct.y-5}" r="${TOLERANCE}"/>`;
+    overlay += `<circle class="player focus" cx="${correct.x}" cy="${correct.y-5}" r="21"/>`;
+    const focusPos = ROLES[focusKey].rot[step].pos;
+    overlay += `<text class="player-label focus" x="${correct.x}" y="${correct.y+1}" text-anchor="middle">${shortLabelFor(focusKey, focusPos)}</text>`;
+  }
+  if(pick){
+    const ok = answered && correct && dist(pick, {x:correct.x, y:correct.y-5}) <= TOLERANCE;
+    overlay += `<circle class="pick-marker ${ok?'ok':''}" cx="${pick.x}" cy="${pick.y}" r="11"/>`;
+    overlay += `<line class="pick-marker ${ok?'ok':''}" x1="${pick.x-6}" y1="${pick.y}" x2="${pick.x+6}" y2="${pick.y}"/>`;
+    overlay += `<line class="pick-marker ${ok?'ok':''}" x1="${pick.x}" y1="${pick.y-6}" x2="${pick.x}" y2="${pick.y+6}"/>`;
+  }
+
+  return `<svg id="pitch" class="court placement ${answered?'locked':''}" viewBox="0 0 360 305" xmlns="http://www.w3.org/2000/svg">
+    <rect class="court-bg" x="0" y="16" width="360" height="289" rx="4"/>
+    <line class="row-divider" x1="0" y1="99" x2="360" y2="99"/>
     <line class="net-line" x1="0" y1="16" x2="360" y2="16"/>
     <text class="net-label" x="180" y="10" text-anchor="middle">NETZ</text>
-    ${zones}
+    ${ghosts}
+    ${overlay}
   </svg>`;
+}
+
+function dist(a, b){
+  return Math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2);
 }
 
 function render(){
@@ -502,47 +553,90 @@ function renderLearn(){
 function renderQuiz(){
   const role = ROLES[state.role];
   const q = state.quiz;
-  const rot = q.order[q.idx];
-  const data = role.rot[rot];
-  const answered = q.answered;
-  return `
+  const item = q.pool[q.idx];
+  const answered = item.answered;
+  const total = q.pool.length;
+
+  const head = `
     <div class="top-nav">
       <button class="btn-ghost" data-action="home">← Positionen</button>
-      <div class="eyebrow">${role.label} · Quiz</div>
+      <div class="eyebrow">${role.label} · ${q.retryRound ? "Fehler-Runde" : "Quiz"}</div>
     </div>
     <div class="score-bar">
-      <span>Frage ${q.idx+1} / ${q.order.length}</span>
+      <span>Frage ${q.idx+1} / ${total}</span>
       <span>Punkte: <b>${q.score}</b></span>
-    </div>
-    <div class="quiz-prompt">Läufer-${rot}</div>
-    <div class="quiz-sub">Wo musst du als ${role.label} stehen? Tippe auf das richtige Feld.</div>
-    <div class="court-shell">${courtSVG({clickable: !answered, correctZone: answered ? data.pos : null, pickedZone: answered ? q.pickedZone : null})}</div>
-    <div id="feedback" class="feedback ${answered ? 'show '+(q.lastCorrect?'ok':'bad') : ''}">
-      ${answered ? `<div class="title">${q.lastCorrect ? 'Richtig!' : 'Nicht ganz.'}</div><p style="margin:0;">${data.von} ${data.wohin}</p>` : ""}
-    </div>
+    </div>`;
+
+  const nav = `
     <div class="nav-row">
       <button class="btn secondary" data-action="quiz-quit">Beenden</button>
-      <button class="btn" data-action="quiz-next" ${answered?"":"disabled"}>${q.idx+1<q.order.length ? "Nächste Frage →" : "Ergebnis anzeigen"}</button>
-    </div>
-  `;
+      <button class="btn" data-action="quiz-next" ${answered?"":"disabled"}>${q.idx+1<total ? "Nächste Frage →" : "Ergebnis anzeigen"}</button>
+    </div>`;
+
+  if(item.type === "placement"){
+    const data = role.rot[item.step];
+    const correct = FORMATION_LAYOUTS[item.step][data.pos];
+    return head + `
+      <div class="quiz-prompt">Läufer-${item.step}</div>
+      <div class="quiz-sub">Klicke auf das Feld: Wo genau stehst du als ${role.label} in der Annahme?</div>
+      <div class="court-shell">${placementSVG({step:item.step, focusKey:state.role, pick:item.pick, answered, correct})}</div>
+      ${answered ? "" : `<div class="hint-text">Tippe die exakte Stelle an — Zone allein reicht nicht.</div>`}
+      <div id="feedback" class="feedback ${answered ? 'show '+(item.correct?'ok':'bad') : ''}">
+        ${answered ? `<div class="title">${item.correct ? 'Richtig!' : 'Nicht ganz.'}</div><p style="margin:0;">Du stehst hier auf Position <b>${data.pos}</b>. ${data.von}</p>` : ""}
+      </div>` + nav;
+  }
+
+  // type === "rule"
+  const opts = item.options.map((o,i) => {
+    let cls = "mc-opt";
+    if(answered){
+      if(o === item.answer) cls += " correct";
+      else if(i === item.picked) cls += " wrong";
+      else cls += " dim";
+    }
+    return `<button class="${cls}" data-mc="${i}" ${answered?"disabled":""}>${o}</button>`;
+  }).join("");
+
+  return head + `
+    <div class="quiz-prompt">Läufer-${item.step}</div>
+    <div class="quiz-sub">${item.question}</div>
+    <div class="mc-list">${opts}</div>
+    <div id="feedback" class="feedback ${answered ? 'show '+(item.correct?'ok':'bad') : ''}">
+      ${answered ? `<div class="title">${item.correct ? 'Richtig!' : 'Nicht ganz.'}</div><p style="margin:0;">${role.rot[item.step].von}</p>` : ""}
+    </div>` + nav;
 }
 
 function renderResult(){
   const role = ROLES[state.role];
   const q = state.quiz;
-  const pct = Math.round((q.score/6)*100);
+  const total = q.pool.length;
+  const pct = Math.round((q.score/total)*100);
+  const placeItems = q.pool.filter(i=>i.type==="placement");
+  const ruleItems  = q.pool.filter(i=>i.type==="rule");
+  const placeOk = placeItems.filter(i=>i.correct).length;
+  const ruleOk  = ruleItems.filter(i=>i.correct).length;
+  const wrong = q.pool.filter(i=>!i.correct);
+
   let msg = "Solide Basis — noch ein Durchlauf festigt es.";
   if(pct===100) msg = "Perfekt! Diese Rotation sitzt.";
   else if(pct>=70) msg = "Sehr gut! Kleine Wackler, aber im Kern verstanden.";
+
   return `
     <div class="top-nav">
       <button class="btn-ghost" data-action="home">← Positionen</button>
       <div class="eyebrow">${role.label} · Ergebnis</div>
     </div>
     <div class="info-card result-card">
-      <div class="big">${q.score} / 6</div>
+      <div class="big">${q.score} / ${total}</div>
       <p>${msg}</p>
+      <div class="result-breakdown">
+        <div>Aufstellung<b>${placeOk} / ${placeItems.length}</b></div>
+        <div>Regeln<b>${ruleOk} / ${ruleItems.length}</b></div>
+      </div>
     </div>
+    ${wrong.length ? `<div class="skip-row" style="margin-top:16px;">
+      <button class="btn-ghost skip-btn" data-action="quiz-retry">${wrong.length} Fehler wiederholen →</button>
+    </div>` : ""}
     <div class="nav-row">
       <button class="btn secondary" data-action="learn-again">Nochmal lernen</button>
       <button class="btn" data-action="quiz-again">Quiz wiederholen</button>
@@ -579,16 +673,27 @@ function attachEvents(){
   const quizQuit = document.querySelector('[data-action="quiz-quit"]');
   if(quizQuit) quizQuit.addEventListener("click", ()=>{ state.screen="home"; render(); });
 
-  document.querySelectorAll(".zone.clickable").forEach(el=>{
-    el.addEventListener("click", ()=>{ handleZoneClick(Number(el.dataset.zone)); });
+  const pitch = document.getElementById("pitch");
+  if(pitch) pitch.addEventListener("click", handleCourtClick);
+
+  document.querySelectorAll("[data-mc]").forEach(el=>{
+    el.addEventListener("click", ()=>{ handleMcClick(Number(el.dataset.mc)); });
+  });
+
+  const retry = document.querySelector('[data-action="quiz-retry"]');
+  if(retry) retry.addEventListener("click", ()=>{
+    const wrong = state.quiz.pool.filter(i=>!i.correct).map(i=>{
+      const c = Object.assign({}, i);
+      c.answered = false; c.correct = false; c.pick = null; c.picked = null;
+      return c;
+    });
+    beginQuiz(shuffle(wrong));
   });
 
   const qNext = document.querySelector('[data-action="quiz-next"]');
   if(qNext) qNext.addEventListener("click", ()=>{
-    if(state.quiz.idx+1 < state.quiz.order.length){
+    if(state.quiz.idx+1 < state.quiz.pool.length){
       state.quiz.idx++;
-      state.quiz.answered = false;
-      state.quiz.pickedZone = null;
       render();
     } else {
       state.screen = "result";
@@ -606,21 +711,80 @@ function shuffle(arr){
   return a;
 }
 
-function beginQuiz(){
+/* ---------------- QUIZ-POOL ---------------- */
+function buildPool(){
+  const role = ROLES[state.role];
+  const steps = [1,2,3,4,5,6];
+  const pool = [];
+
+  // Typ 1: Aufstellung aufs Feld klicken — jede Rotation einmal
+  for(const step of steps){
+    pool.push({ type:"placement", step, answered:false, correct:false, pick:null });
+  }
+
+  // Typ 2: Regel-Multiple-Choice — eine echte Regel je Rotation,
+  // Distraktoren sind Regeln derselben Rolle aus anderen Rotationen.
+  for(const step of steps){
+    const own = role.rot[step].regeln;
+    const answer = own[Math.floor(Math.random()*own.length)];
+    const others = [];
+    for(const s of steps){
+      if(s === step) continue;
+      for(const r of role.rot[s].regeln){
+        if(!own.includes(r) && !others.includes(r)) others.push(r);
+      }
+    }
+    const options = shuffle([answer, ...shuffle(others).slice(0,3)]);
+    pool.push({
+      type:"rule", step, answer, options,
+      question:`Welche Regel gilt für dich als ${role.label} bei Läufer-${step}?`,
+      answered:false, correct:false, picked:null
+    });
+  }
+
+  return shuffle(pool);
+}
+
+function beginQuiz(pool=null){
   state.screen = "quiz";
-  state.quiz = { order: shuffle([1,2,3,4,5,6]), idx:0, score:0, answered:false, lastCorrect:false, pickedZone:null };
+  state.quiz = {
+    pool: pool || buildPool(),
+    idx: 0,
+    score: 0,
+    retryRound: !!pool
+  };
   render();
 }
 
-function handleZoneClick(zone){
-  const role = ROLES[state.role];
+function handleCourtClick(evt){
   const q = state.quiz;
-  const rot = q.order[q.idx];
-  const correctPos = role.rot[rot].pos;
-  q.answered = true;
-  q.pickedZone = zone;
-  q.lastCorrect = (zone === correctPos);
-  if(q.lastCorrect) q.score++;
+  const item = q.pool[q.idx];
+  if(item.answered) return;
+
+  const svg = document.getElementById("pitch");
+  const pt = svg.createSVGPoint();
+  pt.x = evt.clientX;
+  pt.y = evt.clientY;
+  const loc = pt.matrixTransform(svg.getScreenCTM().inverse());
+
+  const data = ROLES[state.role].rot[item.step];
+  const target = FORMATION_LAYOUTS[item.step][data.pos];
+
+  item.pick = { x: Math.round(loc.x), y: Math.round(loc.y) };
+  item.correct = dist(item.pick, { x:target.x, y:target.y-5 }) <= TOLERANCE;
+  item.answered = true;
+  if(item.correct) q.score++;
+  render();
+}
+
+function handleMcClick(i){
+  const q = state.quiz;
+  const item = q.pool[q.idx];
+  if(item.answered) return;
+  item.picked = i;
+  item.correct = item.options[i] === item.answer;
+  item.answered = true;
+  if(item.correct) q.score++;
   render();
 }
 
