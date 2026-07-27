@@ -352,33 +352,39 @@ const ROLES = {
 
 const LEARN_ORDER = [1,6,5,4,3,2];
 
-/* Feld-Ränder für die Zonen-Berechnung (viewBox-Einheiten). */
-const NET_Y = 16;
-const COURT_BOTTOM = 305;
-const COURT_LEFT = 0;
-const COURT_RIGHT = 360;
+/* Echte Voronoi-Prüfung: ein Klick zählt für eine Zonennummer, wenn deren
+   Spielerposition (in echtem, euklidischem Abstand — nicht nur nach Achse!)
+   näher am Klick liegt als jede andere Position in dieser Rotation.
+   Das verhindert winzige Zonen bei Spielern, die zwar in x nah beieinander
+   stehen, aber in y weit auseinander (z.B. Läufer 3: Z und Position 5). */
+function nearestZone(step, x, y){
+  const layout = FORMATION_LAYOUTS[step];
+  let best = null, bestDist = Infinity;
+  for(const num in layout){
+    const p = layout[num];
+    const d = (p.x-x)**2 + (p.y-y)**2;
+    if(d < bestDist){ bestDist = d; best = Number(num); }
+  }
+  return best;
+}
 
-/* Berechnet das gültige Klick-Rechteck für eine Zonennummer in einer Rotation:
-   begrenzt durch die Mittellinien zu den jeweils nächsten Nachbarn in jede
-   der 4 Richtungen (nicht nach fixer Vorne/Hinten-Reihe, da einzelne Spieler
-   je nach Rotation z.B. sehr weit vorgezogen stehen können). Ohne Nachbar in
-   einer Richtung gilt der Feldrand. */
-function getZoneBox(step, zoneNum){
+function isCorrectZone(step, zoneNum, x, y){
+  return nearestZone(step, x, y) === zoneNum;
+}
+
+/* Radius für die visuelle Zielmarkierung nach dem Beantworten: der halbe
+   Abstand zum nächsten Nachbarn (garantiert innerhalb der echten Zone). */
+function targetGuideRadius(step, zoneNum){
   const layout = FORMATION_LAYOUTS[step];
   const p = layout[zoneNum];
-  const others = Object.keys(layout).filter(k => Number(k) !== zoneNum).map(k => layout[k]);
-
-  const leftCandidates = others.filter(o => o.x < p.x);
-  const rightCandidates = others.filter(o => o.x > p.x);
-  const topCandidates = others.filter(o => o.y < p.y);
-  const bottomCandidates = others.filter(o => o.y > p.y);
-
-  const left = leftCandidates.length ? (Math.max(...leftCandidates.map(o=>o.x)) + p.x) / 2 : COURT_LEFT;
-  const right = rightCandidates.length ? (Math.min(...rightCandidates.map(o=>o.x)) + p.x) / 2 : COURT_RIGHT;
-  const top = topCandidates.length ? (Math.max(...topCandidates.map(o=>o.y)) + p.y) / 2 : NET_Y;
-  const bottom = bottomCandidates.length ? (Math.min(...bottomCandidates.map(o=>o.y)) + p.y) / 2 : COURT_BOTTOM;
-
-  return { left, right, top, bottom };
+  let minDist = Infinity;
+  for(const num in layout){
+    if(Number(num) === zoneNum) continue;
+    const o = layout[num];
+    const d = Math.sqrt((o.x-p.x)**2 + (o.y-p.y)**2);
+    if(d < minDist) minDist = d;
+  }
+  return minDist / 2;
 }
 
 const SHORT_LABEL = { Z:"Z", MB1:"MB", MB2:"L", AA1:"AA", AA2:"AA", DIA:"D" };
@@ -477,7 +483,7 @@ function placementSVG({step, focusKey, pick=null, answered=false}){
   }
   const focusPos = ROLES[focusKey].rot[step].pos;
   const correct = layout[focusPos];
-  const box = getZoneBox(step, focusPos);
+  const guideR = targetGuideRadius(step, focusPos);
 
   // Mitspieler immer sichtbar (nur der eigene Spieler fehlt - den muss man setzen)
   let ghosts = "";
@@ -493,12 +499,12 @@ function placementSVG({step, focusKey, pick=null, answered=false}){
 
   let overlay = "";
   if(answered){
-    overlay += `<rect class="target-ring" x="${box.left}" y="${box.top}" width="${box.right-box.left}" height="${box.bottom-box.top}"/>`;
+    overlay += `<circle class="target-ring" cx="${correct.x}" cy="${correct.y-5}" r="${guideR}"/>`;
     overlay += `<circle class="player focus" cx="${correct.x}" cy="${correct.y-5}" r="31"/>`;
     overlay += `<text class="player-label focus" x="${correct.x}" y="${correct.y+3}" text-anchor="middle">${shortLabelFor(focusKey, focusPos)}</text>`;
   }
   if(pick){
-    const ok = answered && pick.x >= box.left && pick.x <= box.right && pick.y >= box.top && pick.y <= box.bottom;
+    const ok = answered && isCorrectZone(step, focusPos, pick.x, pick.y);
     overlay += `<circle class="pick-marker ${ok?'ok':''}" cx="${pick.x}" cy="${pick.y}" r="11"/>`;
     overlay += `<line class="pick-marker ${ok?'ok':''}" x1="${pick.x-6}" y1="${pick.y}" x2="${pick.x+6}" y2="${pick.y}"/>`;
     overlay += `<line class="pick-marker ${ok?'ok':''}" x1="${pick.x}" y1="${pick.y-6}" x2="${pick.x}" y2="${pick.y+6}"/>`;
@@ -800,10 +806,9 @@ function handleCourtClick(evt){
   const loc = pt.matrixTransform(svg.getScreenCTM().inverse());
 
   const data = ROLES[state.role].rot[item.step];
-  const box = getZoneBox(item.step, data.pos);
 
   item.pick = { x: Math.round(loc.x), y: Math.round(loc.y) };
-  item.correct = item.pick.x >= box.left && item.pick.x <= box.right && item.pick.y >= box.top && item.pick.y <= box.bottom;
+  item.correct = isCorrectZone(item.step, data.pos, item.pick.x, item.pick.y);
   item.answered = true;
   if(item.correct) q.score++;
   render();
