@@ -167,10 +167,10 @@ svg.formation .row-divider{ stroke:#ffffff; stroke-width:2; }
 svg.formation .net-label{ fill:#1a1a1a; font-weight:700; }
 .player{ fill:#4a4a4a; }
 .player.focus{ fill:#0d0d0d; stroke:var(--accent); stroke-width:3; }
-.player-label{ font-weight:800; font-size:14px; fill:#ffffff; pointer-events:none; }
+.player-label{ font-weight:800; font-size:16px; fill:#ffffff; pointer-events:none; }
 .player-label.focus{ fill:#ffffff; }
 .player-num-bg{ fill:#ffffff; stroke:#1a1a1a; stroke-width:1; }
-.player-num{ font-weight:700; font-size:11px; fill:#1a1a1a; pointer-events:none; }
+.player-num{ font-weight:700; font-size:12px; fill:#1a1a1a; pointer-events:none; }
 .move-arrow{ fill:none; stroke:#1a1a1a; stroke-width:2.6; stroke-dasharray:5 5; opacity:1; }
 .move-arrow.focus{ stroke-width:2.6; stroke-dasharray:5 5; opacity:1; }
 .arrow-head{ fill:#1a1a1a; opacity:1; }
@@ -351,8 +351,8 @@ const ROLES = {
 
 const LEARN_ORDER = [1,6,5,4,3,2];
 
-/* Klick-Toleranz im Quiz (viewBox-Einheiten). Spielerkreis hat r=27. */
-const TOLERANCE = 50;
+/* Klick-Toleranz im Quiz (viewBox-Einheiten). Spielerkreis hat r=31. */
+const TOLERANCE = 55;
 
 const SHORT_LABEL = { Z:"Z", MB1:"MB", MB2:"L", AA1:"AA", AA2:"AA", DIA:"D" };
 const FRONT_ZONES = [2,3,4];
@@ -417,11 +417,11 @@ function formationSVG(step, focusKey){
     const cx = layout[num].x, cy = layout[num].y;
     const occKey = positions[n];
     const isFocus = occKey === focusKey;
-    const r = isFocus ? 27 : 23;
+    const r = isFocus ? 31 : 28;
     circles += `<circle class="player ${isFocus?'focus':''}" cx="${cx}" cy="${cy-5}" r="${r}"/>`;
-    circles += `<text class="player-label ${isFocus?'focus':''}" x="${cx}" y="${cy+2}" text-anchor="middle">${occKey ? shortLabelFor(occKey, n) : ''}</text>`;
-    circles += `<circle class="player-num-bg" cx="${cx}" cy="${cy+r-7}" r="10"/>`;
-    circles += `<text class="player-num" x="${cx}" y="${cy+r-3}" text-anchor="middle">${n}</text>`;
+    circles += `<text class="player-label ${isFocus?'focus':''}" x="${cx}" y="${cy+3}" text-anchor="middle">${occKey ? shortLabelFor(occKey, n) : ''}</text>`;
+    circles += `<circle class="player-num-bg" cx="${cx}" cy="${cy+r-8}" r="11"/>`;
+    circles += `<text class="player-num" x="${cx}" y="${cy+r-4}" text-anchor="middle">${n}</text>`;
   }
 
   return `<svg class="court formation" viewBox="0 0 360 305" xmlns="http://www.w3.org/2000/svg">
@@ -455,18 +455,18 @@ function placementSVG({step, focusKey, pick=null, answered=false, correct=null})
     const n = Number(num);
     if(positions[n] === focusKey) continue;
     const p = layout[num];
-    ghosts += `<circle class="player" cx="${p.x}" cy="${p.y-5}" r="23"/>`;
-    ghosts += `<text class="player-label" x="${p.x}" y="${p.y+2}" text-anchor="middle">${shortLabelFor(positions[n], n)}</text>`;
-    ghosts += `<circle class="player-num-bg" cx="${p.x}" cy="${p.y+16}" r="10"/>`;
-    ghosts += `<text class="player-num" x="${p.x}" y="${p.y+20}" text-anchor="middle">${n}</text>`;
+    ghosts += `<circle class="player" cx="${p.x}" cy="${p.y-5}" r="28"/>`;
+    ghosts += `<text class="player-label" x="${p.x}" y="${p.y+3}" text-anchor="middle">${shortLabelFor(positions[n], n)}</text>`;
+    ghosts += `<circle class="player-num-bg" cx="${p.x}" cy="${p.y+20}" r="11"/>`;
+    ghosts += `<text class="player-num" x="${p.x}" y="${p.y+24}" text-anchor="middle">${n}</text>`;
   }
 
   let overlay = "";
   if(answered && correct){
     overlay += `<circle class="target-ring" cx="${correct.x}" cy="${correct.y-5}" r="${TOLERANCE}"/>`;
-    overlay += `<circle class="player focus" cx="${correct.x}" cy="${correct.y-5}" r="27"/>`;
+    overlay += `<circle class="player focus" cx="${correct.x}" cy="${correct.y-5}" r="31"/>`;
     const focusPos = ROLES[focusKey].rot[step].pos;
-    overlay += `<text class="player-label focus" x="${correct.x}" y="${correct.y+2}" text-anchor="middle">${shortLabelFor(focusKey, focusPos)}</text>`;
+    overlay += `<text class="player-label focus" x="${correct.x}" y="${correct.y+3}" text-anchor="middle">${shortLabelFor(focusKey, focusPos)}</text>`;
   }
   if(pick){
     const ok = answered && correct && dist(pick, {x:correct.x, y:correct.y-5}) <= TOLERANCE;
