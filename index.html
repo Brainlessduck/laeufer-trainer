@@ -750,17 +750,20 @@ function buildPool(){
   const pool = [];
 
   // Pro Rotation: erst die Aufstellung (Klicken), direkt danach die
-  // Regel-Frage zu genau dieser Rotation.
+  // Regel-Frage zu genau dieser Rotation. Distraktoren kommen bewusst von
+  // ANDEREN ROLLEN in der GLEICHEN Rotation (nicht von der eigenen Rolle aus
+  // anderen Rotationen) — so beschreiben sie zwangsläufig eine andere
+  // Position im selben Moment und können nicht zufällig auch stimmen.
   for(const step of steps){
     pool.push({ type:"placement", step, answered:false, correct:false, pick:null });
 
     const own = role.rot[step].regeln;
     const answer = own[Math.floor(Math.random()*own.length)];
     const others = [];
-    for(const s of steps){
-      if(s === step) continue;
-      for(const r of role.rot[s].regeln){
-        if(!own.includes(r) && !others.includes(r)) others.push(r);
+    for(const key in ROLES){
+      if(key === state.role) continue;
+      for(const r of ROLES[key].rot[step].regeln){
+        if(!others.includes(r)) others.push(r);
       }
     }
     const options = shuffle([answer, ...shuffle(others).slice(0,3)]);
