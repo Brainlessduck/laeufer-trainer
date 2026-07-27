@@ -146,7 +146,8 @@ p.sub{ color:var(--text-dim); line-height:1.75; font-size:1.02rem; max-width:56c
 /* Court */
 .court-shell{ display:flex; justify-content:center; margin:16px 0; }
 .rotation-photo{ max-width:100%; width:340px; border-radius:16px; border:1px solid var(--card-border); }
-svg.court{ width:100%; max-width:320px; height:auto; }
+svg.court{ width:100%; max-width:340px; height:auto; }
+svg.court.placement{ max-width:460px; }
 .zone{ fill: rgba(255,255,255,0.04); stroke:var(--card-border); stroke-width:2; transition:.15s; }
 html[data-theme="light"] .zone{ fill: rgba(0,0,0,0.03); }
 .zone.clickable{ cursor:pointer; }
@@ -351,8 +352,34 @@ const ROLES = {
 
 const LEARN_ORDER = [1,6,5,4,3,2];
 
-/* Klick-Toleranz im Quiz (viewBox-Einheiten). Spielerkreis hat r=31. */
-const TOLERANCE = 55;
+/* Feld-Ränder für die Zonen-Berechnung (viewBox-Einheiten). */
+const NET_Y = 16;
+const COURT_BOTTOM = 305;
+const COURT_LEFT = 0;
+const COURT_RIGHT = 360;
+
+/* Berechnet das gültige Klick-Rechteck für eine Zonennummer in einer Rotation:
+   begrenzt durch die Mittellinien zu den jeweils nächsten Nachbarn in jede
+   der 4 Richtungen (nicht nach fixer Vorne/Hinten-Reihe, da einzelne Spieler
+   je nach Rotation z.B. sehr weit vorgezogen stehen können). Ohne Nachbar in
+   einer Richtung gilt der Feldrand. */
+function getZoneBox(step, zoneNum){
+  const layout = FORMATION_LAYOUTS[step];
+  const p = layout[zoneNum];
+  const others = Object.keys(layout).filter(k => Number(k) !== zoneNum).map(k => layout[k]);
+
+  const leftCandidates = others.filter(o => o.x < p.x);
+  const rightCandidates = others.filter(o => o.x > p.x);
+  const topCandidates = others.filter(o => o.y < p.y);
+  const bottomCandidates = others.filter(o => o.y > p.y);
+
+  const left = leftCandidates.length ? (Math.max(...leftCandidates.map(o=>o.x)) + p.x) / 2 : COURT_LEFT;
+  const right = rightCandidates.length ? (Math.min(...rightCandidates.map(o=>o.x)) + p.x) / 2 : COURT_RIGHT;
+  const top = topCandidates.length ? (Math.max(...topCandidates.map(o=>o.y)) + p.y) / 2 : NET_Y;
+  const bottom = bottomCandidates.length ? (Math.min(...bottomCandidates.map(o=>o.y)) + p.y) / 2 : COURT_BOTTOM;
+
+  return { left, right, top, bottom };
+}
 
 const SHORT_LABEL = { Z:"Z", MB1:"MB", MB2:"L", AA1:"AA", AA2:"AA", DIA:"D" };
 const FRONT_ZONES = [2,3,4];
@@ -442,12 +469,15 @@ function formationSVG(step, focusKey){
   </svg>`;
 }
 
-function placementSVG({step, focusKey, pick=null, answered=false, correct=null}){
+function placementSVG({step, focusKey, pick=null, answered=false}){
   const layout = FORMATION_LAYOUTS[step];
   const positions = {};
   for(const key in ROLES){
     positions[ROLES[key].rot[step].pos] = key;
   }
+  const focusPos = ROLES[focusKey].rot[step].pos;
+  const correct = layout[focusPos];
+  const box = getZoneBox(step, focusPos);
 
   // Mitspieler immer sichtbar (nur der eigene Spieler fehlt - den muss man setzen)
   let ghosts = "";
@@ -462,14 +492,13 @@ function placementSVG({step, focusKey, pick=null, answered=false, correct=null})
   }
 
   let overlay = "";
-  if(answered && correct){
-    overlay += `<circle class="target-ring" cx="${correct.x}" cy="${correct.y-5}" r="${TOLERANCE}"/>`;
+  if(answered){
+    overlay += `<rect class="target-ring" x="${box.left}" y="${box.top}" width="${box.right-box.left}" height="${box.bottom-box.top}"/>`;
     overlay += `<circle class="player focus" cx="${correct.x}" cy="${correct.y-5}" r="31"/>`;
-    const focusPos = ROLES[focusKey].rot[step].pos;
     overlay += `<text class="player-label focus" x="${correct.x}" y="${correct.y+3}" text-anchor="middle">${shortLabelFor(focusKey, focusPos)}</text>`;
   }
   if(pick){
-    const ok = answered && correct && dist(pick, {x:correct.x, y:correct.y-5}) <= TOLERANCE;
+    const ok = answered && pick.x >= box.left && pick.x <= box.right && pick.y >= box.top && pick.y <= box.bottom;
     overlay += `<circle class="pick-marker ${ok?'ok':''}" cx="${pick.x}" cy="${pick.y}" r="11"/>`;
     overlay += `<line class="pick-marker ${ok?'ok':''}" x1="${pick.x-6}" y1="${pick.y}" x2="${pick.x+6}" y2="${pick.y}"/>`;
     overlay += `<line class="pick-marker ${ok?'ok':''}" x1="${pick.x}" y1="${pick.y-6}" x2="${pick.x}" y2="${pick.y+6}"/>`;
@@ -578,11 +607,10 @@ function renderQuiz(){
 
   if(item.type === "placement"){
     const data = role.rot[item.step];
-    const correct = FORMATION_LAYOUTS[item.step][data.pos];
     return head + `
       <div class="quiz-prompt">Läufer-${item.step}</div>
       <div class="quiz-sub">Klicke auf das Feld: Wo genau stehst du als ${role.label} in der Annahme?</div>
-      <div class="court-shell">${placementSVG({step:item.step, focusKey:state.role, pick:item.pick, answered, correct})}</div>
+      <div class="court-shell">${placementSVG({step:item.step, focusKey:state.role, pick:item.pick, answered})}</div>
       ${answered ? "" : `<div class="hint-text">Deine Mitspieler stehen schon — tippe an, wo du selbst hingehörst.</div>`}
       <div id="feedback" class="feedback ${answered ? 'show '+(item.correct?'ok':'bad') : ''}">
         ${answered ? `<div class="title">${item.correct ? 'Richtig!' : 'Nicht ganz.'}</div><p style="margin:0;">Du stehst hier auf Position <b>${data.pos}</b>. ${data.von}</p>` : ""}
@@ -769,10 +797,10 @@ function handleCourtClick(evt){
   const loc = pt.matrixTransform(svg.getScreenCTM().inverse());
 
   const data = ROLES[state.role].rot[item.step];
-  const target = FORMATION_LAYOUTS[item.step][data.pos];
+  const box = getZoneBox(item.step, data.pos);
 
   item.pick = { x: Math.round(loc.x), y: Math.round(loc.y) };
-  item.correct = dist(item.pick, { x:target.x, y:target.y-5 }) <= TOLERANCE;
+  item.correct = item.pick.x >= box.left && item.pick.x <= box.right && item.pick.y >= box.top && item.pick.y <= box.bottom;
   item.answered = true;
   if(item.correct) q.score++;
   render();
