@@ -246,6 +246,7 @@ svg.formation .net-label{ fill:#1a1a1a; font-weight:700; }
 .mc-opt.correct{ border-color:var(--ok); background:color-mix(in srgb, var(--ok) 10%, var(--card-bg)); }
 .mc-opt.wrong{ border-color:var(--bad); background:color-mix(in srgb, var(--bad) 10%, var(--card-bg)); }
 .mc-opt.dim{ opacity:.5; }
+.mc-letter{ color:var(--accent); margin-right:4px; }
 
 .footer-note{ margin-top:44px; font-size:12px; color:var(--text-dim); text-align:center; line-height:1.6; }
 .footer-note a{ color:var(--link-blue); text-decoration:underline; }
@@ -588,6 +589,7 @@ function renderQuiz(){
   }
 
   // type === "rule"
+  const LETTERS = ["A","B","C","D"];
   const opts = item.options.map((o,i) => {
     let cls = "mc-opt";
     if(answered){
@@ -595,7 +597,7 @@ function renderQuiz(){
       else if(i === item.picked) cls += " wrong";
       else cls += " dim";
     }
-    return `<button class="${cls}" data-mc="${i}" ${answered?"disabled":""}>${o}</button>`;
+    return `<button class="${cls}" data-mc="${i}" ${answered?"disabled":""}><b class="mc-letter">${LETTERS[i]})</b> ${o}</button>`;
   }).join("");
 
   return head + `
@@ -715,17 +717,14 @@ function shuffle(arr){
 /* ---------------- QUIZ-POOL ---------------- */
 function buildPool(){
   const role = ROLES[state.role];
-  const steps = [1,2,3,4,5,6];
+  const steps = shuffle([1,2,3,4,5,6]);
   const pool = [];
 
-  // Typ 1: Aufstellung aufs Feld klicken — jede Rotation einmal
+  // Pro Rotation: erst die Aufstellung (Klicken), direkt danach die
+  // Regel-Frage zu genau dieser Rotation.
   for(const step of steps){
     pool.push({ type:"placement", step, answered:false, correct:false, pick:null });
-  }
 
-  // Typ 2: Regel-Multiple-Choice — eine echte Regel je Rotation,
-  // Distraktoren sind Regeln derselben Rolle aus anderen Rotationen.
-  for(const step of steps){
     const own = role.rot[step].regeln;
     const answer = own[Math.floor(Math.random()*own.length)];
     const others = [];
@@ -738,12 +737,12 @@ function buildPool(){
     const options = shuffle([answer, ...shuffle(others).slice(0,3)]);
     pool.push({
       type:"rule", step, answer, options,
-      question:`Welche Regel gilt für dich als ${role.label} bei Läufer-${step}?`,
+      question:`Was musst du als ${role.label} bei Läufer-${step} beachten?`,
       answered:false, correct:false, picked:null
     });
   }
 
-  return shuffle(pool);
+  return pool;
 }
 
 function beginQuiz(pool=null){
